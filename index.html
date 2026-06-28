@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sparshub EDU-ERP v1.4 ULTIMATE HAVEN</title>
+<title>Sparshub EDU-ERP v1.5.2 HAVEN OF HAVENS</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -14,23 +14,23 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
 .btn-blue{background:#2563eb;color:#fff}
 .btn-yellow{background:#f59e0b;color:#000}
 .btn-purple{background:#9333ea;color:#fff}
+.btn-gray{background:#475569;color:#fff}
 .tab-active{border-bottom:3px solid #16a34a;color:#16a34a}
 .hidden{display:none}
 .locked{background:#450a0a;border-color:#dc2626}
 .late{border-left:4px solid #dc2626}
 .done{border-left:4px solid #16a34a}
+.inactive{opacity:0.5}
 </style>
 </head>
 <body class="min-h-screen">
 
 <div id="app" class="max-w-7xl mx-auto p-4">
-
   <!-- LOGIN -->
   <div id="loginScreen" class="flex items-center justify-center min-h-screen">
     <div class="card p-8 rounded-2xl w-full max-w-md">
-      <h1 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB HAVEN v1.4</h1>
-      <p class="text-center text-sm text-slate-400 mb-6">SA-SAMS 100% + TEACHER HAVEN</p>
-
+      <h1 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB HAVEN v1.5.2</h1>
+      <p class="text-center text-sm text-slate-400 mb-6">SA-SAMS + TEACHER HAVEN + STAFF OS</p>
       <input id="emisCode" type="text" placeholder="EMIS Code e.g. 909101234" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600">
       <select id="roleSelect" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600">
         <option value="admin">PRINCIPAL / HOD</option>
@@ -38,10 +38,10 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
         <option value="teacher">TEACHER</option>
         <option value="parent">PARENT PORTAL</option>
       </select>
-      <input id="teacherCode" type="text" placeholder="Teacher Code e.g. T-MATHS" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600 hidden">
+      <input id="teacherCode" type="text" placeholder="Teacher Code e.g. T-MATH001" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600 hidden">
       <input id="parentCode" type="text" placeholder="Parent Code e.g. P-THABO2026" class="w-full bg-slate-800 p-3 rounded-lg mb-4 border-slate-600 hidden">
       <button onclick="login()" class="btn w-full p-3 rounded-lg">ENTER HAVEN</button>
-      <p class="text-xs text-slate-500 mt-3">Demo: EMIS 909101234 | Teacher T-MATHS | Parent P-THABO2026</p>
+      <p class="text-xs text-slate-500 mt-3">Demo: EMIS 909101234 | Teacher T-MATH001 | Parent P-THABO2026</p>
     </div>
   </div>
 
@@ -54,10 +54,10 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
       </div>
       <button onclick="logout()" class="btn-red px-4 py-2 rounded-lg text-sm">LOGOUT</button>
     </header>
-
     <!-- TABS -->
     <div id="tabs" class="flex gap-6 border-b border-slate-700 mb-6 overflow-x-auto">
       <button class="tab-btn tab-active pb-2" onclick="showTab('dashboard')">DASHBOARD</button>
+      <button class="tab-btn pb-2 admin-only" onclick="showTab('staff')">STAFF MANAGEMENT</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('workflow')">TEACHER WORKFLOW</button>
       <button class="tab-btn pb-2 teacher-only" onclick="showTab('upload')">UPLOAD HUB</button>
       <button class="tab-btn pb-2 admin-only teacher-only" onclick="showTab('tasks')">TASKS</button>
@@ -68,350 +68,141 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
       <button class="tab-btn pb-2 admin-only" onclick="showTab('nsc')">NSC LOCK</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('audit')">AUDIT LOG</button>
     </div>
-
     <!-- DASHBOARD -->
     <div id="dashboard" class="tab-content">
       <div class="grid md:grid-cols-4 gap-4">
         <div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">Learners</p><p id="statLearners" class="text-3xl font-800">2</p></div>
-        <div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">Teachers</p><p id="statTeachers" class="text-3xl font-800">2</p></div>
+        <div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">Staff Active</p><p id="statTeachers" class="text-3xl font-800">2</p></div>
         <div class="card p-4 rounded-xl admin-only finance-only"><p class="text-sm text-slate-400">Fees Owing</p><p id="statFees" class="text-3xl font-800 text-red-400">R0</p></div>
         <div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">NSC Status</p><p id="statNSC" class="text-lg font-800">OPEN</p></div>
       </div>
     </div>
-
-    <!-- TEACHER WORKFLOW TRACKER -->
-    <div id="workflow" class="tab-content hidden">
-      <div class="card p-6 rounded-xl">
-        <h3 class="text-xl font-800 mb-4">Teacher Workflow Tracker - HAVEN</h3>
-        <p class="text-sm text-slate-400 mb-4">Late = RED. Done = GREEN. No excuses.</p>
-        <div id="workflowList"></div>
-      </div>
-    </div>
-
-    <!-- TEACHER UPLOAD HUB -->
-    <div id="upload" class="tab-content hidden">
-      <div class="card p-6 rounded-xl">
-        <h3 class="text-xl font-800 mb-4">Teacher Upload Hub</h3>
-        <div class="grid md:grid-cols-2 gap-4 mb-4">
-          <input id="uploadTitle" placeholder="Test Name e.g. Grade 10 T3 Math Test" class="bg-slate-800 p-3 rounded-lg border-slate-600">
-          <select id="uploadType" class="bg-slate-800 p-3 rounded-lg border-slate-600">
-            <option>Class Test</option><option>Exam</option><option>Worksheet</option><option>Memo</option>
+    <!-- STAFF MANAGEMENT -->
+    <div id="staff" class="tab-content hidden">
+      <div class="card p-6 rounded-xl mb-4">
+        <h3 class="text-xl font-800 mb-4">Staff Management - Add Roles & Departments</h3>
+        <div class="grid md:grid-cols-4 gap-3 mb-4">
+          <input id="staffName" placeholder="Full Name e.g. Mr Mokoena" class="bg-slate-800 p-3 rounded-lg">
+          <select id="staffRole" class="bg-slate-800 p-3 rounded-lg">
+            <option value="teacher">TEACHER</option><option value="hod">HOD</option><option value="finance">FINANCE</option><option value="admin">ADMIN</option>
           </select>
+          <select id="staffDept" class="bg-slate-800 p-3 rounded-lg">
+            <option>Mathematics</option><option>Science</option><option>English</option><option>Finance</option><option>Admin</option>
+          </select>
+          <button onclick="addStaff()" class="btn px-4 py-2 rounded-lg">+ ADD STAFF</button>
         </div>
-        <input id="uploadFile" type="file" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600">
-        <textarea id="uploadComment" placeholder="Teacher Comment for Parents" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600"></textarea>
-        <button onclick="uploadDoc()" class="btn w-full p-3 rounded-lg">UPLOAD TO PARENT PORTAL</button>
-        <h4 class="font-800 mt-6 mb-2">My Uploads</h4>
-        <div id="myUploads"></div>
+      </div>
+      <div class="card p-6 rounded-xl">
+        <h4 class="font-800 mb-3">All Staff - Login Codes</h4>
+        <table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Code</th><th>Name</th><th>Role</th><th>Dept</th><th>Status</th><th>Action</th></tr></thead><tbody id="staffTable"></tbody></table>
       </div>
     </div>
-
+    <!-- TEACHER WORKFLOW -->
+    <div id="workflow" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Teacher Workflow Tracker - HAVEN</h3><p class="text-sm text-slate-400 mb-4">Late = RED. Done = GREEN.</p><div id="workflowList"></div></div></div>
+    <!-- UPLOAD HUB -->
+    <div id="upload" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Teacher Upload Hub</h3><div class="grid md:grid-cols-2 gap-4 mb-4"><input id="uploadTitle" placeholder="Test Name" class="bg-slate-800 p-3 rounded-lg"><select id="uploadType" class="bg-slate-800 p-3 rounded-lg"><option>Class Test</option><option>Exam</option><option>Worksheet</option><option>Memo</option></select></div><input id="uploadFile" type="file" class="w-full bg-slate-800 p-3 rounded-lg mb-3"><textarea id="uploadComment" placeholder="Teacher Comment for Parents" class="w-full bg-slate-800 p-3 rounded-lg mb-3"></textarea><button onclick="uploadDoc()" class="btn w-full p-3 rounded-lg">UPLOAD TO PARENT PORTAL</button><h4 class="font-800 mt-6 mb-2">My Uploads</h4><div id="myUploads"></div></div></div>
     <!-- TASKS -->
-    <div id="tasks" class="tab-content hidden">
-      <div class="card p-6 rounded-xl">
-        <h3 class="text-xl font-800 mb-4">Task Assigner</h3>
-        <div class="grid md:grid-cols-3 gap-3 mb-4">
-          <input id="taskTitle" placeholder="Task e.g. Upload T3 Test" class="bg-slate-800 p-3 rounded-lg">
-          <input id="taskDue" type="date" class="bg-slate-800 p-3 rounded-lg">
-          <select id="taskTeacher" class="bg-slate-800 p-3 rounded-lg"></select>
-        </div>
-        <button onclick="addTask()" class="btn mb-4 px-4 py-2 rounded-lg">ASSIGN TASK</button>
-        <div id="taskList"></div>
-      </div>
-    </div>
-
+    <div id="tasks" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Task Assigner</h3><div class="grid md:grid-cols-3 gap-3 mb-4"><input id="taskTitle" placeholder="Task" class="bg-slate-800 p-3 rounded-lg"><input id="taskDue" type="date" class="bg-slate-800 p-3 rounded-lg"><select id="taskTeacher" class="bg-slate-800 p-3 rounded-lg"></select></div><button onclick="addTask()" class="btn mb-4 px-4 py-2 rounded-lg">ASSIGN TASK</button><div id="taskList"></div></div></div>
     <!-- FEES -->
-    <div id="fees" class="tab-content hidden">
-      <div class="card p-6 rounded-xl"><div class="flex justify-between mb-4"><h3 class="text-xl font-800">Fees</h3><button onclick="addFee()" class="btn px-4 py-2 rounded-lg text-sm">+ ADD FEE</button></div>
-      <table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead><tbody id="feesTable"></tbody></table></div>
-    </div>
-
+    <div id="fees" class="tab-content hidden"><div class="card p-6 rounded-xl"><div class="flex justify-between mb-4"><h3 class="text-xl font-800">Fees</h3><button onclick="addFee()" class="btn px-4 py-2 rounded-lg text-sm">+ ADD FEE</button></div><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead><tbody id="feesTable"></tbody></table></div></div>
     <!-- MARKS -->
-    <div id="marks" class="tab-content hidden">
-      <div class="card p-6 rounded-xl" id="marksCard">
-        <div class="flex justify-between mb-4 flex-wrap gap-2">
-          <h3 class="text-xl font-800">Marks Capture</h3>
-          <div class="flex gap-2">
-            <input type="file" id="bulkMarks" accept=".csv" class="hidden" onchange="importMarks(event)">
-            <button onclick="document.getElementById('bulkMarks').click()" class="btn-yellow px-4 py-2 rounded-lg text-sm">BULK IMPORT</button>
-            <button onclick="addMark()" class="btn px-4 py-2 rounded-lg text-sm">+ ADD MARK</button>
-          </div>
-        </div>
-        <p id="nscLockMsg" class="hidden text-red-400 text-sm mb-2">🔒 NSC LOCKED: Grade 12 marks cannot be edited</p>
-        <table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Grade</th><th>Subject</th><th>Mark %</th><th>Term</th></tr></thead><tbody id="marksTable"></tbody></table>
-      </div>
-    </div>
-
+    <div id="marks" class="tab-content hidden"><div class="card p-6 rounded-xl" id="marksCard"><div class="flex justify-between mb-4"><h3 class="text-xl font-800">Marks Capture</h3><div class="flex gap-2"><input type="file" id="bulkMarks" accept=".csv" class="hidden" onchange="importMarks(event)"><button onclick="document.getElementById('bulkMarks').click()" class="btn-yellow px-4 py-2 rounded-lg text-sm">BULK IMPORT</button><button onclick="addMark()" class="btn px-4 py-2 rounded-lg text-sm">+ ADD MARK</button></div></div><p id="nscLockMsg" class="hidden text-red-400 text-sm mb-2">🔒 NSC LOCKED</p><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Grade</th><th>Subject</th><th>Mark %</th><th>Term</th></tr></thead><tbody id="marksTable"></tbody></table></div></div>
     <!-- PARENT LINK -->
-    <div id="parentlink" class="tab-content hidden">
-      <div class="card p-6 rounded-xl">
-        <h3 class="text-xl font-800 mb-4">Parent Portal</h3>
-        <div class="flex gap-2 mb-3"><input id="parentURL" readonly class="flex-1 bg-slate-800 p-3 rounded-lg text-sm"><button onclick="copyLink()" class="btn px-4 py-2 rounded-lg">COPY</button></div>
-        <button onclick="sendWhatsApp()" class="btn px-4 py-2 rounded-lg">SEND WHATSAPP</button>
-      </div>
-    </div>
-
+    <div id="parentlink" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Parent Portal</h3><div class="flex gap-2 mb-3"><input id="parentURL" readonly class="flex-1 bg-slate-800 p-3 rounded-lg text-sm"><button onclick="copyLink()" class="btn px-4 py-2 rounded-lg">COPY</button></div><button onclick="sendWhatsApp()" class="btn px-4 py-2 rounded-lg">SEND WHATSAPP</button></div></div>
     <!-- DBE EXPORT -->
-    <div id="export" class="tab-content hidden">
-      <div class="card p-6 rounded-xl">
-        <h3 class="text-xl font-800 mb-4">DBE SA-SAMS v2024.3 EXPORT</h3>
-        <div class="grid md:grid-cols-3 gap-3">
-          <button onclick="exportDBE('enrolment')" class="btn-blue p-4 rounded-lg">1. ENROLMENT.csv</button>
-          <button onclick="exportDBE('marks')" class="btn-blue p-4 rounded-lg">2. MARKS.csv</button>
-          <button onclick="exportDBE('attendance')" class="btn-blue p-4 rounded-lg">3. ATTENDANCE.csv</button>
-        </div>
-        <button onclick="exportDBE('all')" class="btn-purple w-full mt-4 p-3 rounded-lg">DOWNLOAD ALL 3 FILES</button>
-      </div>
-    </div>
-
+    <div id="export" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">DBE SA-SAMS v2024.3 EXPORT</h3><div class="grid md:grid-cols-3 gap-3"><button onclick="exportDBE('enrolment')" class="btn-blue p-4 rounded-lg">1. ENROLMENT.csv</button><button onclick="exportDBE('marks')" class="btn-blue p-4 rounded-lg">2. MARKS.csv</button><button onclick="exportDBE('attendance')" class="btn-blue p-4 rounded-lg">3. ATTENDANCE.csv</button></div><button onclick="exportDBE('all')" class="btn-purple w-full mt-4 p-3 rounded-lg">DOWNLOAD ALL 3 FILES</button></div></div>
     <!-- NSC LOCK -->
-    <div id="nsc" class="tab-content hidden">
-      <div class="card p-6 rounded-xl">
-        <h3 class="text-xl font-800 mb-4">NSC Year-End Lock - IEB/DBE Compliant</h3>
-        <div class="flex gap-3">
-          <button onclick="lockNSC()" class="btn-red px-6 py-3 rounded-lg">LOCK GRADE 12 NOW</button>
-          <button onclick="unlockNSC()" class="btn-yellow px-6 py-3 rounded-lg">UNLOCK WITH PIN</button>
-        </div>
-        <p id="nscStatus" class="mt-4 text-sm">Status: OPEN</p>
-      </div>
-    </div>
-
+    <div id="nsc" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">NSC Year-End Lock</h3><div class="flex gap-3"><button onclick="lockNSC()" class="btn-red px-6 py-3 rounded-lg">LOCK GRADE 12 NOW</button><button onclick="unlockNSC()" class="btn-yellow px-6 py-3 rounded-lg">UNLOCK WITH PIN</button></div><p id="nscStatus" class="mt-4 text-sm">Status: OPEN</p></div></div>
     <!-- AUDIT LOG -->
-    <div id="audit" class="tab-content hidden">
-      <div class="card p-6 rounded-xl">
-        <h3 class="text-xl font-800 mb-4">Audit Log - Fraud Proof</h3>
-        <table class="w-full text-xs"><thead><tr class="text-left text-slate-400 border-b"><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="auditTable"></tbody></table>
-      </div>
-    </div>
-
-    <!-- PARENT VIEW = HAVEN VAULT -->
-    <div id="parentView" class="hidden">
-      <div class="card p-6 rounded-xl mb-4"><h3 class="text-2xl font-800">Thabo Mokoena | Grade 10A</h3></div>
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="card p-4 rounded-xl"><h4 class="font-800 mb-2">Fees</h4><p>Balance: <b id="pBalance" class="text-red-400">R0</b></p><button class="btn w-full mt-3 py-2 rounded-lg">PAY NOW</button></div>
-        <div class="card p-4 rounded-xl"><h4 class="font-800 mb-2">Latest Marks</h4><div id="parentMarks"></div></div>
-      </div>
-      <div class="card p-6 rounded-xl mt-4">
-        <h4 class="font-800 mb-2">📁 Test & Exam Vault - HAVEN</h4>
-        <p class="text-sm text-slate-400 mb-3">Every test your child wrote. View + Teacher Comment.</p>
-        <div id="parentVault"></div>
-      </div>
-    </div>
-
+    <div id="audit" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Audit Log - Fraud Proof</h3><table class="w-full text-xs"><thead><tr class="text-left text-slate-400 border-b"><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="auditTable"></tbody></table></div></div>
+    <!-- PARENT VIEW -->
+    <div id="parentView" class="hidden"><div class="card p-6 rounded-xl mb-4"><h3 class="text-2xl font-800">Thabo Mokoena | Grade 10A</h3></div><div class="grid md:grid-cols-2 gap-4"><div class="card p-4 rounded-xl"><h4 class="font-800 mb-2">Fees</h4><p>Balance: <b id="pBalance" class="text-red-400">R0</b></p><button class="btn w-full mt-3 py-2 rounded-lg">PAY NOW</button></div><div class="card p-4 rounded-xl"><h4 class="font-800 mb-2">Latest Marks</h4><div id="parentMarks"></div></div></div><div class="card p-6 rounded-xl mt-4"><h4 class="font-800 mb-2">📁 Test & Exam Vault - HAVEN</h4><p class="text-sm text-slate-400 mb-3">Every test your child wrote.</p><div id="parentVault"></div></div></div>
   </div>
 </div>
 
 <script>
 let DB = {
-  emis: '',
-  nscLocked: false,
-  teachers: [{code:'T-MATHS', name:'Mr Mokoena', subject:'Mathematics'}, {code:'T-SCIENCE', name:'Ms Dlamini', subject:'Science'}],
+  emis: '', nscLocked: false,
+  teachers: [{code:'T-MATH001', name:'Mr Mokoena', role:'teacher', dept:'Mathematics', active:true},{code:'T-SCIE001', name:'Ms Dlamini', role:'teacher', dept:'Science', active:true}],
   learners: [{id:'L001', name:'Thabo Mokoena', grade:'10A', parentCode:'P-THABO2026', idno:'0601015000087'}],
   learnersG12: [{id:'L012', name:'Anele Dlamini', grade:'12A', parentCode:'P-ANELE2026', idno:'0505055000088'}],
   fees: [{learnerId:'L001', amount:2500, paid:1500}],
-  marks: [
-    {learnerId:'L001', subject:'Mathematics', mark:85, term:'T3'},
-    {learnerId:'L012', subject:'Mathematics', mark:72, term:'T3'}
-  ],
-  uploads: [
-    {id:'U1', teacher:'T-MATHS', title:'Grade 10 T3 Math Test', type:'Class Test', date:'2026-09-01', comment:'Class average 72%. Well done.', file:'math_test.pdf'},
-    {id:'U2', teacher:'T-SCIENCE', title:'Science Worksheet 4', type:'Worksheet', date:'2026-08-28', comment:'Revise chapter 3.', file:'science_ws.pdf'}
-  ],
-  tasks: [
-    {id:'TK1', teacher:'T-SCIENCE', title:'Upload T3 Science Test', due:'2026-09-05', status:'late'},
-    {id:'TK2', teacher:'T-MATHS', title:'Upload T3 Math Test', due:'2026-09-10', status:'done'}
-  ],
+  marks: [{learnerId:'L001', subject:'Mathematics', mark:85, term:'T3'},{learnerId:'L012', subject:'Mathematics', mark:72, term:'T3'}],
+  uploads: [{id:'U1', teacher:'T-MATH001', title:'Grade 10 T3 Math Test', type:'Class Test', date:'2026-09-01', comment:'Class average 72%. Well done.', file:'math_test.pdf'},{id:'U2', teacher:'T-SCIE001', title:'Science Worksheet 4', type:'Worksheet', date:'2026-08-28', comment:'Revise chapter 3.', file:'science_ws.pdf'}],
+  tasks: [{id:'TK1', teacher:'T-SCIE001', title:'Upload T3 Science Test', due:'2026-09-05', status:'late'},{id:'TK2', teacher:'T-MATH001', title:'Upload T3 Math Test', due:'2026-09-10', status:'done'}],
   audit: []
 };
-let CURRENT_ROLE = '';
-let CURRENT_TEACHER = '';
-
+let CURRENT_ROLE = ''; let CURRENT_TEACHER = '';
 function logAudit(action, details){ DB.audit.unshift({time:new Date().toLocaleString(), user:CURRENT_ROLE+(CURRENT_TEACHER?' '+CURRENT_TEACHER:''), action, details}); }
-
 function login(){
   const emis = document.getElementById('emisCode').value;
   if(!/^[0-9]{9}$/.test(emis)) return alert('Invalid EMIS Code. Must be 9 digits.');
-
-  DB.emis = emis;
-  CURRENT_ROLE = document.getElementById('roleSelect').value;
-  CURRENT_TEACHER = document.getElementById('teacherCode').value;
-  const code = document.getElementById('parentCode').value;
-
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('mainApp').classList.remove('hidden');
-  document.getElementById('emisBadge').innerText = 'EMIS:' + emis;
-  document.getElementById('userRole').innerText = 'Role: ' + CURRENT_ROLE.toUpperCase() + (CURRENT_TEACHER?' '+CURRENT_TEACHER:'');
-  logAudit('LOGIN', 'EMIS:'+emis);
-
+  DB.emis = emis; CURRENT_ROLE = document.getElementById('roleSelect').value; CURRENT_TEACHER = document.getElementById('teacherCode').value; const code = document.getElementById('parentCode').value;
+  if(CURRENT_ROLE==='teacher'){ const t = DB.teachers.find(x=>x.code===CURRENT_TEACHER); if(!t) return alert('Invalid Teacher Code'); if(!t.active) return alert('Account Deactivated. See Principal.'); }
+  document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('mainApp').classList.remove('hidden');
+  document.getElementById('emisBadge').innerText = 'EMIS:' + emis; document.getElementById('userRole').innerText = 'Role: ' + CURRENT_ROLE.toUpperCase() + (CURRENT_TEACHER?' '+CURRENT_TEACHER:''); logAudit('LOGIN', 'EMIS:'+emis);
   if(CURRENT_ROLE === 'parent'){ document.getElementById('tabs').classList.add('hidden'); document.getElementById('parentView').classList.remove('hidden'); renderParent(code); }
   else if(CURRENT_ROLE === 'teacher'){ document.getElementById('tabs').querySelectorAll('.admin-only').forEach(el=>el.classList.add('hidden')); }
   else { renderAll(); }
-  applyPermissions();
-  checkNSCLock();
-  populateTeacherSelect();
+  applyPermissions(); checkNSCLock(); populateTeacherSelect();
 }
-
 function logout(){ logAudit('LOGOUT',''); location.reload(); }
-
 function applyPermissions(){
   document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', CURRENT_ROLE!== 'admin'));
   document.querySelectorAll('.finance-only').forEach(el => el.classList.toggle('hidden',!['admin','finance'].includes(CURRENT_ROLE)));
   document.querySelectorAll('.teacher-only').forEach(el => el.classList.toggle('hidden',!['admin','teacher'].includes(CURRENT_ROLE)));
 }
-
 function showTab(id){ document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active')); document.getElementById(id).classList.remove('hidden'); event.target.classList.add('tab-active'); renderAll(); }
-
-function populateTeacherSelect(){
-  const sel = document.getElementById('taskTeacher');
-  sel.innerHTML = DB.teachers.map(t=>`<option value="${t.code}">${t.name} - ${t.subject}</option>`).join('');
-}
-
+function populateTeacherSelect(){ const sel = document.getElementById('taskTeacher'); sel.innerHTML = DB.teachers.filter(t=>t.active && t.role==='teacher').map(t=>`<option value="${t.code}">${t.name} - ${t.dept}</option>`).join(''); }
 function renderAll(){
   const allLearners = [...DB.learners,...DB.learnersG12];
   document.getElementById('statLearners').innerText = allLearners.length;
-  document.getElementById('statTeachers').innerText = DB.teachers.length;
+  document.getElementById('statTeachers').innerText = DB.teachers.filter(t=>t.active).length;
   const totalBal = DB.fees.reduce((s,f)=>s+(f.amount-f.paid),0);
   document.getElementById('statFees').innerText = 'R' + totalBal;
   document.getElementById('statNSC').innerText = DB.nscLocked? 'LOCKED' : 'OPEN';
   document.getElementById('statNSC').className = DB.nscLocked? 'text-lg font-800 text-red-400' : 'text-lg font-800 text-[#16a34a]';
-
-  // WORKFLOW
-  document.getElementById('workflowList').innerHTML = DB.teachers.map(t=>{
-    const myUploads = DB.uploads.filter(u=>u.teacher===t.code).length;
-    const myLate = DB.tasks.filter(x=>x.teacher===t.code && x.status==='late').length;
-    return `<div class="card p-3 mb-2 ${myLate>0?'late':'done'}"><p class="font-800">${t.name} - ${t.subject}</p><p class="text-sm">Uploads: ${myUploads} | Overdue: ${myLate}</p></div>`
-  }).join('');
-
-  // TEACHER UPLOADS
-  if(CURRENT_ROLE==='teacher'){
-    document.getElementById('myUploads').innerHTML = DB.uploads.filter(u=>u.teacher===CURRENT_TEACHER).map(u=>`<div class="card p-2 mb-2"><p class="font-800">${u.title}</p><p class="text-xs text-slate-400">${u.type} | ${u.date} | ${u.file}</p></div>`).join('') || '<p class="text-sm text-slate-400">No uploads yet.</p>';
-  }
-
-  // TASKS
-  document.getElementById('taskList').innerHTML = DB.tasks.map(t=>{
-    const teacher = DB.teachers.find(x=>x.code===t.teacher);
-    return `<div class="card p-3 mb-2 ${t.status}"><p class="font-800">${t.title}</p><p class="text-sm">${teacher.name} | Due: ${t.due} | Status: ${t.status.toUpperCase()}</p>${t.status==='late'?'<button onclick="markDone(\''+t.id+'\')" class="btn text-xs px-2 py-1 mt-2">MARK DONE</button>':''}</div>`
-  }).join('');
-
-  // FEES
-  document.getElementById('feesTable').innerHTML = DB.fees.map(f=>{
-    const l = allLearners.find(x=>x.id===f.learnerId);
-    return `<tr class="border-b"><td>${l.name}</td><td>R${f.amount}</td><td>R${f.paid}</td><td>R${f.amount-f.paid}</td><td><button onclick="payFee('${f.learnerId}')" class="btn text-xs px-2 py-1 rounded">PAY</button></td></tr>`
-  }).join('');
-
-  // MARKS
-  document.getElementById('marksTable').innerHTML = DB.marks.map(m=>{
-    const l = allLearners.find(x=>x.id===m.learnerId);
-    const color = m.mark<50?'text-red-400':'';
-    return `<tr class="border-b ${color}"><td>${l.name}</td><td>${l.grade}</td><td>${m.subject}</td><td>${m.mark}%</td><td>${m.term}</td></tr>`
-  }).join('');
-
-  // AUDIT
+  document.getElementById('staffTable').innerHTML = DB.teachers.map(t=>`<tr class="border-b ${t.active?'':'inactive'}"><td class="font-800">${t.code}</td><td>${t.name}</td><td>${t.role.toUpperCase()}</td><td>${t.dept}</td><td>${t.active?'<span class="text-[#16a34a]">ACTIVE</span>':'<span class="text-red-400">INACTIVE</span>'}</td><td><button onclick="toggleStaff('${t.code}')" class="btn-gray text-xs px-2 py-1 rounded">${t.active?'DEACTIVATE':'ACTIVATE'}</button></td></tr>`).join('');
+  document.getElementById('workflowList').innerHTML = DB.teachers.filter(t=>t.role==='teacher'&&t.active).map(t=>{ const myUploads = DB.uploads.filter(u=>u.teacher===t.code).length; const myLate = DB.tasks.filter(x=>x.teacher===t.code && x.status==='late').length; return `<div class="card p-3 mb-2 ${myLate>0?'late':'done'}"><p class="font-800">${t.name} - ${t.dept}</p><p class="text-sm">Uploads: ${myUploads} | Overdue: ${myLate}</p></div>` }).join('');
+  if(CURRENT_ROLE==='teacher'){ document.getElementById('myUploads').innerHTML = DB.uploads.filter(u=>u.teacher===CURRENT_TEACHER).map(u=>`<div class="card p-2 mb-2"><p class="font-800">${u.title}</p><p class="text-xs text-slate-400">${u.type} | ${u.date} | ${u.file}</p></div>`).join('') || '<p class="text-sm text-slate-400">No uploads yet.</p>'; }
+  document.getElementById('taskList').innerHTML = DB.tasks.map(t=>{ const teacher = DB.teachers.find(x=>x.code===t.teacher); return `<div class="card p-3 mb-2 ${t.status}"><p class="font-800">${t.title}</p><p class="text-sm">${teacher.name} | Due: ${t.due} | Status: ${t.status.toUpperCase()}</p>${t.status==='late'?'<button onclick="markDone(\''+t.id+'\')" class="btn text-xs px-2 py-1 mt-2">MARK DONE</button>':''}</div>` }).join('');
+  document.getElementById('feesTable').innerHTML = DB.fees.map(f=>{ const l = allLearners.find(x=>x.id===f.learnerId); return `<tr class="border-b"><td>${l.name}</td><td>R${f.amount}</td><td>R${f.paid}</td><td>R${f.amount-f.paid}</td><td><button onclick="payFee('${f.learnerId}')" class="btn text-xs px-2 py-1 rounded">PAY</button></td></tr>` }).join('');
+  document.getElementById('marksTable').innerHTML = DB.marks.map(m=>{ const l = allLearners.find(x=>x.id===m.learnerId); const color = m.mark<50?'text-red-400':''; return `<tr class="border-b ${color}"><td>${l.name}</td><td>${l.grade}</td><td>${m.subject}</td><td>${m.mark}%</td><td>${m.term}</td></tr>` }).join('');
   document.getElementById('auditTable').innerHTML = DB.audit.slice(0,20).map(a=>`<tr class="border-b"><td>${a.time}</td><td>${a.user}</td><td>${a.action}</td><td>${a.details}</td></tr>`).join('');
-
   document.getElementById('parentURL').value = window.location.origin + window.location.pathname + '?parent=P-THABO2026';
 }
-
 function renderParent(code){
-  const allLearners = [...DB.learners,...DB.learnersG12];
-  const l = allLearners.find(x=>x.parentCode===code);
-  if(!l) return alert('Invalid Parent Code');
-  const marks = DB.marks.filter(m=>m.learnerId===l.id);
-  const bal = DB.fees.find(f=>f.learnerId===l.id);
+  const allLearners = [...DB.learners,...DB.learnersG12]; const l = allLearners.find(x=>x.parentCode===code); if(!l) return alert('Invalid Parent Code');
+  const marks = DB.marks.filter(m=>m.learnerId===l.id); const bal = DB.fees.find(f=>f.learnerId===l.id);
   document.getElementById('pBalance').innerText = 'R' + (bal? bal.amount-bal.paid : 0);
   document.getElementById('parentMarks').innerHTML = marks.map(m=>`<p>${m.subject}: <b>${m.mark}%</b></p>`).join('');
   document.getElementById('parentVault').innerHTML = DB.uploads.map(u=>`<div class="card p-3 mb-2"><p class="font-800">${u.title}</p><p class="text-sm">${u.type} | ${u.date}</p><p class="text-sm italic text-slate-400">Teacher: "${u.comment}"</p><button class="btn-blue text-xs px-2 py-1 mt-2 rounded">DOWNLOAD ${u.file}</button></div>`).join('');
 }
-
-// TEACHER ACTIONS
-function uploadDoc(){
-  const title = document.getElementById('uploadTitle').value;
-  const type = document.getElementById('uploadType').value;
-  const comment = document.getElementById('uploadComment').value;
-  const file = document.getElementById('uploadFile').files[0]?.name || 'file.pdf';
-  if(!title) return alert('Enter Test Name');
-  DB.uploads.push({id:'U'+Date.now(), teacher:CURRENT_TEACHER, title, type, date:new Date().toISOString().split('T')[0], comment, file});
-  logAudit('UPLOAD', title);
-  alert('Uploaded! Parents can now see it.');
-  renderAll();
+function addStaff(){
+  const name = document.getElementById('staffName').value; const role = document.getElementById('staffRole').value; const dept = document.getElementById('staffDept').value; if(!name) return alert('Enter Name');
+  const prefix = role==='teacher'?'T-':role==='finance'?'F-':role==='hod'?'H-':'A-'; const deptCode = dept.substring(0,4).toUpperCase(); const count = DB.teachers.filter(t=>t.dept===dept).length + 1; const code = `${prefix}${deptCode}${String(count).padStart(3,'0')}`;
+  DB.teachers.push({code, name, role, dept, active:true}); logAudit('STAFF_ADD', `${name} as ${code}`); document.getElementById('staffName').value=''; alert(`Staff Added! Login Code: ${code}`); renderAll(); populateTeacherSelect();
 }
-
-function addTask(){
-  const title = document.getElementById('taskTitle').value;
-  const due = document.getElementById('taskDue').value;
-  const teacher = document.getElementById('taskTeacher').value;
-  if(!title ||!due) return alert('Fill all fields');
-  DB.tasks.push({id:'TK'+Date.now(), teacher, title, due, status:'late'});
-  logAudit('TASK_ASSIGN', title+' to '+teacher);
-  renderAll();
-}
+function toggleStaff(code){ const t = DB.teachers.find(x=>x.code===code); t.active =!t.active; logAudit('STAFF_TOGGLE', `${code} = ${t.active?'ACTIVE':'INACTIVE'}`); renderAll(); populateTeacherSelect(); }
+function uploadDoc(){ const title = document.getElementById('uploadTitle').value; const type = document.getElementById('uploadType').value; const comment = document.getElementById('uploadComment').value; const file = document.getElementById('uploadFile').files[0]?.name || 'file.pdf'; if(!title) return alert('Enter Test Name'); DB.uploads.push({id:'U'+Date.now(), teacher:CURRENT_TEACHER, title, type, date:new Date().toISOString().split('T')[0], comment, file}); logAudit('UPLOAD', title); alert('Uploaded! Parents can now see it.'); renderAll(); }
+function addTask(){ const title = document.getElementById('taskTitle').value; const due = document.getElementById('taskDue').value; const teacher = document.getElementById('taskTeacher').value; if(!title ||!due) return alert('Fill all fields'); DB.tasks.push({id:'TK'+Date.now(), teacher, title, due, status:'late'}); logAudit('TASK_ASSIGN', title+' to '+teacher); renderAll(); }
 function markDone(id){ DB.tasks.find(t=>t.id===id).status='done'; logAudit('TASK_DONE', id); renderAll(); }
-
-// FEES + MARKS = FROM V1.2.1 FIXED
 function addFee(){ const amt = prompt('Fee Amount R'); if(amt){ DB.fees.push({learnerId:'L001', amount:parseInt(amt), paid:0}); logAudit('ADD_FEE', 'R'+amt); renderAll(); } }
 function payFee(id){ const f = DB.fees.find(x=>x.learnerId===id); const pay = prompt('Amount R'); if(pay){ f.paid += parseInt(pay); logAudit('PAY_FEE', 'R'+pay); renderAll(); } }
-function addMark(){
-  if(DB.nscLocked && confirmGrade12()) return alert('🔒 NSC LOCKED: Cannot edit Grade 12 marks.');
-  const sub = prompt('Subject'); const mark = prompt('Mark %');
-  if(sub && mark){ DB.marks.push({learnerId:'L001', subject:sub, mark:parseInt(mark), term:'T3'}); logAudit('ADD_MARK', `${sub}:${mark}%`); renderAll(); }
-}
+function addMark(){ if(DB.nscLocked && confirmGrade12()) return alert('🔒 NSC LOCKED: Cannot edit Grade 12 marks.'); const sub = prompt('Subject'); const mark = prompt('Mark %'); if(sub && mark){ DB.marks.push({learnerId:'L001', subject:sub, mark:parseInt(mark), term:'T3'}); logAudit('ADD_MARK', `${sub}:${mark}%`); renderAll(); } }
 function confirmGrade12(){ return DB.marks.some(m=>m.learnerId==='L012'); }
-
-// NSC LOCK
-function checkNSCLock(){
-  const today = new Date();
-  if(today.getMonth()===10 && today.getDate()>=15){ DB.nscLocked=true; }
-  if(DB.nscLocked){ document.getElementById('marksCard')?.classList.add('locked'); document.getElementById('nscLockMsg')?.classList.remove('hidden'); }
-  document.getElementById('nscStatus').innerText = 'Status: ' + (DB.nscLocked?'LOCKED':'OPEN');
-}
+function checkNSCLock(){ const today = new Date(); if(today.getMonth()===10 && today.getDate()>=15){ DB.nscLocked=true; } if(DB.nscLocked){ document.getElementById('marksCard')?.classList.add('locked'); document.getElementById('nscLockMsg')?.classList.remove('hidden'); } document.getElementById('nscStatus').innerText = 'Status: ' + (DB.nscLocked?'LOCKED':'OPEN'); }
 function lockNSC(){ DB.nscLocked=true; logAudit('NSC_LOCK','Manual Lock'); alert('Grade 12 LOCKED'); renderAll(); checkNSCLock(); }
 function unlockNSC(){ const pin = prompt('Enter Principal PIN to unlock'); if(pin==='9090'){ DB.nscLocked=false; logAudit('NSC_UNLOCK','PIN Used'); alert('Unlocked'); renderAll(); checkNSCLock(); } else alert('Invalid PIN'); }
-
-// DBE EXPORT
-function exportDBE(type){
-  let csv = '';
-  const allLearners = [...DB.learners,...DB.learnersG12];
-  if(type==='enrolment' || type==='all'){
-    csv = 'EMIS,LearnerID,FirstName,Surname,Grade,IDNumber,Gender,DOB\n';
-    allLearners.forEach(l=>{ const [name,...surname] = l.name.split(' '); csv += `${DB.emis},${l.id},${name},${surname.join(' ')},${l.grade},${l.idno},M,2006-01-01\n`; });
-    downloadCSV(csv, `EMIS_${DB.emis}_ENROLMENT.csv`);
-  }
-  if(type==='marks' || type==='all'){
-    csv = 'EMIS,LearnerID,SubjectCode,Mark,Term,Year\n';
-    DB.marks.forEach(m=>csv += `${DB.emis},${m.learnerId},${m.subject},${m.mark},${m.term},2026\n`);
-    downloadCSV(csv, `EMIS_${DB.emis}_MARKS.csv`);
-  }
-  if(type==='attendance' || type==='all'){
-    csv = 'EMIS,LearnerID,Date,Status\n';
-    csv += `${DB.emis},L001,2026-09-04,P\n`;
-    downloadCSV(csv, `EMIS_${DB.emis}_ATTENDANCE.csv`);
-  }
-  logAudit('DBE_EXPORT', type);
-}
-
-function importMarks(event){
-  if(DB.nscLocked) return alert('🔒 NSC LOCKED');
-  const file = event.target.files[0];
-  const reader = new FileReader();
-  reader.onload = e => {
-    const rows = e.target.result.split('\n').slice(1);
-    rows.forEach(r=>{ const [id,sub,mark,term] = r.split(','); if(id) DB.marks.push({learnerId:id, subject:sub, mark:parseInt(mark), term}); });
-    logAudit('BULK_IMPORT', rows.length+' marks'); renderAll();
-  };
-  reader.readAsText(file);
-}
-
-function downloadCSV(csv, filename){ const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); }
+function exportDBE(type){ let csv = ''; const allLearners = [...DB.learners,...DB.learnersG12]; if(type==='enrolment' || type==='all'){ csv = 'EMIS,LearnerID,FirstName,Surname,Grade,IDNumber,Gender,DOB\n'; allLearners.forEach(l=>{ const [name,...surname] = l.name.split(' '); csv += `${DB.emis},${l.id},${name},${surname.join(' ')},${l.grade},${l.idno},M,2006-01-01\n`; }); downloadCSV(csv, `EMIS_${DB.emis}_ENROLMENT.csv`); } if(type==='marks' || type==='all'){ csv = 'EMIS,LearnerID,SubjectCode,Mark,Term,Year\n'; DB.marks.forEach(m=>csv += `${DB.emis},${m.learnerId},${m.subject},${m.mark},${m.term},2026\n`); downloadCSV(csv, `EMIS_${DB.emis}_MARKS.csv`); } if(type==='attendance' || type==='all'){ csv = 'EMIS,LearnerID,Date,Status\n'; csv += `${DB.emis},L001,2026-09-04,P\n`; downloadCSV(csv, `EMIS_${DB.emis}_ATTENDANCE.csv`); } logAudit('DBE_EXPORT', type); }
+function importMarks(event){ if(DB.nscLocked) return alert('🔒 NSC LOCKED'); const file = event.target.files[0]; const reader = new FileReader(); reader.onload = e => { const rows = e.target.result.split('\n').slice(1); rows.forEach(r=>{ const [id,sub,mark,term] = r.split(','); if(id) DB.marks.push({learnerId:id, subject:sub, mark:parseInt(mark), term}); }); logAudit('BULK_IMPORT', rows.length+' marks'); renderAll(); }; reader.readAsText(file); }
+function downloadCSV(csv, filename){ const blob = new Blob([csv], {type:'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; a.click(); URL.revokeObjectURL(url); }
 function copyLink(){ navigator.clipboard.writeText(document.getElementById('parentURL').value); alert('Link Copied!'); }
 function sendWhatsApp(){ window.open('https://wa.me/?text=' + encodeURIComponent(document.getElementById('parentURL').value)); }
-
 const urlParams = new URLSearchParams(window.location.search);
 const pCode = urlParams.get('parent');
 if(pCode){ document.getElementById('roleSelect').value = 'parent'; document.getElementById('parentCode').value = pCode; login(); }
-document.getElementById('roleSelect').onchange = (e)=>{
-  document.getElementById('teacherCode').classList.toggle('hidden', e.target.value!== 'teacher');
-  document.getElementById('parentCode').classList.toggle('hidden', e.target.value!== 'parent');
-}
+document.getElementById('roleSelect').onchange = (e)=>{ document.getElementById('teacherCode').classList.toggle('hidden', e.target.value!== 'teacher'); document.getElementById('parentCode').classList.toggle('hidden', e.target.value!== 'parent'); };
 </script>
 </body>
 </html>
