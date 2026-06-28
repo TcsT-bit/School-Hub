@@ -167,7 +167,7 @@ function login(){
   document.getElementById('loginScreen').classList.add('hidden');document.getElementById('mainApp').classList.remove('hidden');
   document.getElementById('emisBadge').innerText='EMIS:'+emis;document.getElementById('userRole').innerText=role==='teacher'?`${t.name} | ${t.dept}`:`Role: ${role.toUpperCase()}`;
   if(role==='parent'){document.getElementById('tabs').classList.add('hidden');document.getElementById('parentView').classList.remove('hidden');renderParent(pCode);}
-  else{if(role==='teacher'){document.querySelectorAll('.admin-only').forEach(el=>el.classList.add('hidden'));renderTeacherDashboard();}renderAll();}
+  else{if(role==='teacher'){document.querySelectorAll('.admin-only').forEach(el=>el.classList.add('hidden'));renderTeacherDashboard();}else if(role==='admin'){renderHODDashboard();}renderAll();}
   applyPermissions();checkNSCLock();
 }
 function logout(){location.reload();}
@@ -178,14 +178,46 @@ function searchAll(q){q=q.toLowerCase();document.querySelectorAll('tbody tr').fo
 
 function renderTeacherDashboard(){
   const t=DB.teachers.find(x=>x.code===CURRENT_TEACHER);
+  const pred=predictPassRate(t.subjects[0]?.grade,t.subjects[0]?.subject);
   document.getElementById('dashboard').innerHTML=`
-    <div class="grid md:grid-cols-3 gap-4">
+    <div class="grid md:grid-cols-4 gap-4">
       <div class="card p-6 rounded-xl"><p class="text-slate-400">Your Subjects</p><p class="text-2xl font-800">${t.subjects.length}</p></div>
       <div class="card p-6 rounded-xl"><p class="text-slate-400">Total Learners</p><p class="text-2xl font-800">${t.subjects.reduce((s,subj)=>s+DB.learners.filter(l=>l.grade===subj.grade).length,0)}</p></div>
       <div class="card p-6 rounded-xl"><p class="text-slate-400">Tasks Overdue</p><p class="text-2xl font-800 text-red-400">${DB.tasks.filter(x=>x.teacher===CURRENT_TEACHER&&x.status==='late').length}</p></div>
+      <div class="card p-6 rounded-xl bg-[#16a34a]/10 border-[#16a34a]"><p class="text-slate-400">AI NSC Prediction</p><p class="text-2xl font-800 text-[#16a34a]">${pred}%</p></div>
     </div>
     <div class="card p-6 rounded-xl mt-4"><h3 class="font-800 mb-2">Your Classes</h3>${t.subjects.map(s=>`<div class="card p-3 mb-2">${s.subject} - ${s.grade}</div>`).join('')}</div>`;
 }
+
+// v2.3 AI: HOD OVERSIGHT
+function renderHODDashboard(){
+  document.getElementById('dashboard').innerHTML=`
+    <div class="grid md:grid-cols-3 gap-4 mb-4">
+      <div class="card p-6 rounded-xl"><p class="text-slate-400">Total Teachers</p><p class="text-2xl font-800">${DB.teachers.filter(t=>t.role==='teacher').length}</p></div>
+      <div class="card p-6 rounded-xl"><p class="text-slate-400">School Pass %</p><p class="text-2xl font-800 text-[#16a34a]">${schoolPassRate()}%</p></div>
+      <div class="card p-6 rounded-xl"><p class="text-slate-400">At-Risk Learners</p><p class="text-2xl font-800 text-red-400">${totalAtRisk()}</p></div>
+    </div>
+    <div class="card p-6 rounded-xl"><h3 class="font-800 mb-3">👨‍🏫 Teacher Performance</h3>${DB.teachers.filter(t=>t.role==='teacher').map(t=>teacherCard(t)).join('')}</div>`;
+}
+
+function teacherCard(t){
+  const avg=avgForTeacher(t.code);
+  const atRisk=atRiskForTeacher(t.code);
+  return `<div class="card p-3 mb-2 flex justify-between"><div><b>${t.name}</b> - ${t.dept}<p class="text-xs text-slate-400">Avg: ${avg}% | At-Risk: ${atRisk}</p></div><div class="text-2xl ${avg>=50?'text-[#16a34a]':'text-red-400'}">${avg}%</div></div>`;
+}
+
+// v2.3 AI: PREDICTIVE ENGINE
+function predictPassRate(grade,subject){
+  const learners=DB.learners.filter(l=>l.grade===grade);
+  const marks=DB.marks.filter(m=>m.subject===subject&&learners.some(l=>l.id===m.learnerId));
+  if(!marks.length)return 0;
+  const pass=marks.filter(m=>m.mark>=40).length; // DBE pass = 40%
+  return Math.round(pass/marks.length*100);
+}
+function schoolPassRate(){const all=[...DB.learners,...DB.learnersG12];return all.length?Math.round(DB.marks.filter(m=>m.mark>=40).length/DB.marks.length*100)||0:0;}
+function totalAtRisk(){return DB.marks.filter(m=>m.mark<50).length;}
+function avgForTeacher(code){const t=DB.teachers.find(x=>x.code===code);if(!t||!t.subjects.length)return 0;const [g,s]=[t.subjects[0].grade,t.subjects[0].subject];const m=DB.marks.filter(x=>x.subject===s&&DB.learners.filter(l=>l.grade===g).some(l=>l.id===x.learnerId));return m.length?Math.round(m.reduce((a,b)=>a+b.mark,0)/m.length):0;}
+function atRiskForTeacher(code){const t=DB.teachers.find(x=>x.code===code);if(!t||!t.subjects.length)return 0;const [g,s]=[t.subjects[0].grade,t.subjects[0].subject];return DB.marks.filter(m=>m.subject===s&&m.mark<50&&DB.learners.filter(l=>l.grade===g).some(l=>l.id===m.learnerId)).length;}
 
 function renderMyClass(){
   const t=DB.teachers.find(x=>x.code===CURRENT_TEACHER);
@@ -196,13 +228,14 @@ function renderMyClass(){
   const marks=DB.marks.filter(m=>m.subject===subject&&learners.some(l=>l.id===m.learnerId));
   const avg=marks.length?Math.round(marks.reduce((a,b)=>a+b.mark,0)/marks.length):0;
   const atRisk=marks.filter(m=>m.mark<50).length;
+  const pred=predictPassRate(grade,subject);
   const att=DB.attendance[grade]||{};
 
   document.getElementById('classStats').innerHTML=`
     <div class="card p-3"><p class="text-xs text-slate-400">Learners</p><p class="text-xl font-800">${learners.length}</p></div>
     <div class="card p-3"><p class="text-xs text-slate-400">Class Avg</p><p class="text-xl font-800">${avg}%</p></div>
     <div class="card p-3"><p class="text-xs text-slate-400">At Risk <50%</p><p class="text-xl font-800 text-red-400">${atRisk}</p></div>
-    <div class="card p-3"><p class="text-xs text-slate-400">Attendance</p><p class="text-xl font-800">${Object.keys(att).length?Math.round(Object.values(att).filter(x=>x==='P').length/Object.keys(att).length*100):0}%</p></div>`;
+    <div class="card p-3 bg-[#16a34a]/10 border-[#16a34a]"><p class="text-xs text-slate-400">AI NSC Predict</p><p class="text-xl font-800 text-[#16a34a]">${pred}%</p></div>`;
 
   let rows=`<thead><tr class="text-left text-slate-400 border-b"><th>#</th><th>Learner</th><th>Mark %</th>${ATTENDANCE_MODE?'<th>Attendance</th>':''}</tr></thead><tbody>`;
   learners.forEach((l,i)=>{
@@ -235,13 +268,17 @@ function saveAllMarks(){
 
 function toggleAttendanceMode(){ATTENDANCE_MODE=!ATTENDANCE_MODE;renderMyClass();}
 function setAtt(grade,id,status){if(!DB.attendance[grade])DB.attendance[grade]={};DB.attendance[grade][id]=status;saveDB();renderMyClass();}
+
+// v2.3 AI: SMART MESSAGE
 function alertAtRisk(){
   const [grade,subject]=document.getElementById('classFilter').value.split('|');
   const learners=DB.learners.filter(l=>l.grade===grade);
   const atRisk=learners.filter(l=>{const m=DB.marks.find(x=>x.learnerId===l.id&&x.subject===subject);return m&&m.mark<50;});
   if(!atRisk.length)return alert('No At-Risk learners');
-  atRisk.forEach(l=>whatsappParent(l.parentCode,`Alert: ${l.name} is below 50% in ${subject}. Please assist.`));
-  logAudit('ALERT_AT_RISK',`${atRisk.length} parents`);
+  const pred=predictPassRate(grade,subject);
+  atRisk.forEach(l=>{const m=DB.marks.find(x=>x.learnerId===l.id&&x.subject===subject);
+    whatsappParent(l.parentCode,`SPARSHUB AI ALERT: ${l.name} scored ${m.mark}% in ${subject}. Class NSC prediction: ${pred}%. Extra lessons recommended. Reply OK.`);});
+  logAudit('AI_ALERT',`${atRisk.length} parents`);
 }
 
 function renderAll(){
@@ -264,16 +301,16 @@ function renderAll(){
 
 function renderParent(code){const l=[...DB.learners,...DB.learnersG12].find(x=>x.parentCode===code);if(!l)return alert('Invalid');document.getElementById('parentMarks').innerHTML=DB.marks.filter(m=>m.learnerId===l.id).map(m=>`<p>${m.subject}: ${m.mark}%</p>`).join('');document.getElementById('parentVault').innerHTML=DB.uploads.map(u=>`<div class="card p-3 mb-2">${u.title}<p class="text-sm">${u.comment}</p></div>`).join('');}
 
-function addStudent(){const n=document.getElementById('stuName').value,g=document.getElementById('stuGrade').value,i=document.getElementById('stuID').value,p=document.getElementById('stuParent').value;if(!n||!g||!i||!p)return alert('Fill all');const id='L'+String([...DB.learners,...DB.learnersG12].length+1).padStart(3,'0');const s={id,name:n,grade:g,parentCode:p,idno:i};g.startsWith('12')?DB.learnersG12.push(s):DB.learners.push(s);logAudit('STUDENT_ADD',id);['stuName','stuGrade','stuID','stuParent'].forEach(x=>document.getElementById(x).value='');renderAll();}
-function deleteStudent(id){DB.learners=DB.learners.filter(l=>l.id!==id);DB.learnersG12=DB.learnersG12.filter(l=>l.id!==id);logAudit('STUDENT_DEL',id);renderAll();}
-function bulkStudents(e){const f=e.target.files[0];const r=new FileReader();r.onload=ev=>{const wb=XLSX.read(ev.target.result,{type:'binary'});const ws=wb.Sheets[wb.SheetNames[0]];XLSX.utils.sheet_to_json(ws).forEach(row=>{const id='L'+String([...DB.learners,...DB.learnersG12].length+1).padStart(3,'0');const s={id,name:row.Name,grade:row.Grade,parentCode:row.Parent,idno:row.ID};row.Grade.startsWith('12')?DB.learnersG12.push(s):DB.learners.push(s);});logAudit('BULK_STU',f.name);renderAll();};r.readAsBinaryString(f);}
+function addStudent(){const n=document.getElementById('stuName').value,g=document.getElementById('stuGrade').value,i=document.getElementById('stuID').value,p=document.getElementById('stuParent').value;if(!n||!g||!i||!p)return alert('Fill all');const id='L'+String([...DB.learners,...DB.learnersG12].length+1).padStart(3,'0');const s={id,name:n,grade:g,parentCode:p,idno:i};g.startsWith('12')?DB.learnersG12.push(s):DB.learners.push(s);logAudit('STUDENT_ADD',id);saveDB();['stuName','stuGrade','stuID','stuParent'].forEach(x=>document.getElementById(x).value='');renderAll();}
+function deleteStudent(id){DB.learners=DB.learners.filter(l=>l.id!==id);DB.learnersG12=DB.learnersG12.filter(l=>l.id!==id);logAudit('STUDENT_DEL',id);saveDB();renderAll();}
+function bulkStudents(e){const f=e.target.files[0];const r=new FileReader();r.onload=ev=>{const wb=XLSX.read(ev.target.result,{type:'binary'});const ws=wb.Sheets[wb.SheetNames[0]];XLSX.utils.sheet_to_json(ws).forEach(row=>{const id='L'+String([...DB.learners,...DB.learnersG12].length+1).padStart(3,'0');const s={id,name:row.Name,grade:row.Grade,parentCode:row.Parent,idno:row.ID};row.Grade.startsWith('12')?DB.learnersG12.push(s):DB.learners.push(s);});logAudit('BULK_STU',f.name);saveDB();renderAll();};r.readAsBinaryString(f);}
 
-function addStaff(){const n=document.getElementById('staffName').value,r=document.getElementById('staffRole').value,d=document.getElementById('staffDept').value;if(!n||!d)return alert('Name+Dept?');const code=`${r[0].toUpperCase()}-${d.slice(0,4).toUpperCase()}${DB.teachers.length+1}`;DB.teachers.push({code,name:n,role:r,dept:d,subjects:[],active:true});logAudit('STAFF_ADD',code);renderAll();}
-function toggleStaff(code){const t=DB.teachers.find(x=>x.code===code);t.active=!t.active;logAudit('STAFF_TOGGLE',code);renderAll();}
+function addStaff(){const n=document.getElementById('staffName').value,r=document.getElementById('staffRole').value,d=document.getElementById('staffDept').value;if(!n||!d)return alert('Name+Dept?');const code=`${r[0].toUpperCase()}-${d.slice(0,4).toUpperCase()}${DB.teachers.length+1}`;DB.teachers.push({code,name:n,role:r,dept:d,subjects:[],active:true});logAudit('STAFF_ADD',code);saveDB();renderAll();}
+function toggleStaff(code){const t=DB.teachers.find(x=>x.code===code);t.active=!t.active;logAudit('STAFF_TOGGLE',code);saveDB();renderAll();}
 
-function uploadDoc(){const t=document.getElementById('uploadTitle').value,c=document.getElementById('uploadComment').value;if(!t)return alert('Title?');DB.uploads.push({title:t,comment:c,teacher:CURRENT_TEACHER});logAudit('UPLOAD',t);renderAll();}
-function addTask(){const t=document.getElementById('taskTitle').value,d=document.getElementById('taskDue').value,teacher=document.getElementById('taskTeacher').value;if(!t||!d||!teacher)return alert('Fill all');DB.tasks.push({id:'T'+Date.now(),title:t,teacher,due:d,status:'late'});logAudit('TASK_ADD',t);renderAll();}
-function markDone(id){DB.tasks.find(t=>t.id===id).status='done';logAudit('TASK_DONE',id);renderAll();}
+function uploadDoc(){const t=document.getElementById('uploadTitle').value,c=document.getElementById('uploadComment').value;if(!t)return alert('Title?');DB.uploads.push({title:t,comment:c,teacher:CURRENT_TEACHER});logAudit('UPLOAD',t);saveDB();renderAll();}
+function addTask(){const t=document.getElementById('taskTitle').value,d=document.getElementById('taskDue').value,teacher=document.getElementById('taskTeacher').value;if(!t||!d||!teacher)return alert('Fill all');DB.tasks.push({id:'T'+Date.now(),title:t,teacher,due:d,status:'late'});logAudit('TASK_ADD',t);saveDB();renderAll();}
+function markDone(id){DB.tasks.find(t=>t.id===id).status='done';logAudit('TASK_DONE',id);saveDB();renderAll();}
 
 function addFee(){const a=prompt('Amount R');if(a){DB.fees.push({learnerId:'L001',amount:+a,paid:0});logAudit('FEE_ADD',a);saveDB();renderAll();}}
 function payFee(id){const p=prompt('Pay R');if(p){DB.fees.find(f=>f.learnerId===id).paid+=+p;logAudit('FEE_PAY',p);saveDB();renderAll();}}
