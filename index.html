@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sparshub EDU-ERP v1.1 WORLD TIER</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
+.card{background:#1e293b;border:1px solid #334155}
+.btn{background:#16a34a;color:#000;font-weight:800}
+.btn-red{background:#dc2626;color:#fff}
+.btn-blue{background:#2563eb;color:#fff}
+.btn-yellow{background:#f59e0b;color:#000}
+.tab-active{border-bottom:3px solid #16a34a;color:#16a34a}
+.hidden{display:none}
+</style>
+</head>
+<body class="min-h-screen">
+
+<div id="app" class="max-w-7xl mx-auto p-4">
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="flex items-center justify-center min-h-screen">
+    <div class="card p-8 rounded-2xl w-full max-w-md">
+      <h1 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB EDU-ERP v1.1</h1>
+      <p class="text-center text-sm text-slate-400 mb-6">SA-SAMS + Parent Portal + WORLD TIER</p>
+      
+      <select id="roleSelect" class="w-full bg-slate-800 p-3 rounded-lg mb-4 border-slate-600">
+        <option value="admin">SUPER ADMIN / Principal</option>
+        <option value="finance">FINANCE / Bursar</option>
+        <option value="teacher">TEACHER</option>
+        <option value="parent">PARENT PORTAL</option>
+      </select>
+      <input id="schoolCode" type="text" placeholder="School Code" class="w-full bg-slate-800 p-3 rounded-lg mb-4 border-slate-600">
+      <input id="parentCode" type="text" placeholder="Parent Code e.g. P-THABO2026" class="w-full bg-slate-800 p-3 rounded-lg mb-4 border-slate-600 hidden">
+      <button onclick="login()" class="btn w-full p-3 rounded-lg">ENTER SYSTEM</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp" class="hidden">
+    <header class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-2xl font-800 text-[#16a34a]">SPARSHUB ACADEMY</h2>
+        <p id="userRole" class="text-sm text-slate-400">Role: ADMIN</p>
+      </div>
+      <button onclick="logout()" class="btn-red px-4 py-2 rounded-lg text-sm">LOGOUT</button>
+    </header>
+
+    <!-- TABS -->
+    <div id="tabs" class="flex gap-6 border-b border-slate-700 mb-6 overflow-x-auto">
+      <button class="tab-btn tab-active pb-2" onclick="showTab('dashboard')">DASHBOARD</button>
+      <button class="tab-btn pb-2 admin-only finance-only" onclick="showTab('fees')">FEES</button>
+      <button class="tab-btn pb-2 admin-only teacher-only" onclick="showTab('marks')">MARKS</button>
+      <button class="tab-btn pb-2 admin-only" onclick="showTab('parentlink')">PARENT LINK</button>
+      <button class="tab-btn pb-2 admin-only" onclick="showTab('export')">SA-SAMS EXPORT</button>
+      <button class="tab-btn pb-2 admin-only" onclick="showTab('audit')">AUDIT LOG</button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="tab-content">
+      <div class="grid md:grid-cols-4 gap-4">
+        <div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">Learners</p><p id="statLearners" class="text-3xl font-800">1</p></div>
+        <div class="card p-4 rounded-xl admin-only finance-only"><p class="text-sm text-slate-400">Fees Owing</p><p id="statFees" class="text-3xl font-800 text-red-400">R0</p></div>
+        <div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">Term Avg</p><p id="statAvg" class="text-3xl font-800 text-[#16a34a]">0%</p></div>
+        <div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">At Risk <50%</p><p id="statRisk" class="text-3xl font-800 text-yellow-400">0</p></div>
+      </div>
+    </div>
+
+    <!-- FEES -->
+    <div id="fees" class="tab-content hidden">
+      <div class="card p-6 rounded-xl">
+        <div class="flex justify-between mb-4">
+          <h3 class="text-xl font-800">Fees Management</h3>
+          <button onclick="addFee()" class="btn px-4 py-2 rounded-lg text-sm">+ ADD FEE</button>
+        </div>
+        <table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Action</th></tr></thead><tbody id="feesTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- MARKS -->
+    <div id="marks" class="tab-content hidden">
+      <div class="card p-6 rounded-xl">
+        <div class="flex justify-between mb-4 flex-wrap gap-2">
+          <h3 class="text-xl font-800">Marks Capture</h3>
+          <div class="flex gap-2">
+            <input type="file" id="bulkMarks" accept=".csv" class="hidden" onchange="importMarks(event)">
+            <button onclick="document.getElementById('bulkMarks').click()" class="btn-yellow px-4 py-2 rounded-lg text-sm">BULK IMPORT CSV</button>
+            <button onclick="addMark()" class="btn px-4 py-2 rounded-lg text-sm">+ ADD MARK</button>
+            <button onclick="exportPDF()" class="btn-blue px-4 py-2 rounded-lg text-sm">EXPORT PDF</button>
+          </div>
+        </div>
+        <table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Subject</th><th>Mark %</th><th>Term</th></tr></thead><tbody id="marksTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PARENT LINK -->
+    <div id="parentlink" class="tab-content hidden">
+      <div class="card p-6 rounded-xl">
+        <h3 class="text-xl font-800 mb-4">Parent Portal Link - WORLD TIER</h3>
+        <div class="flex gap-2 mb-3"><input id="parentURL" readonly class="flex-1 bg-slate-800 p-3 rounded-lg text-sm"><button onclick="copyLink()" class="btn px-4 py-2 rounded-lg">COPY</button></div>
+        <button onclick="sendWhatsApp()" class="btn px-4 py-2 rounded-lg">SEND VIA WHATSAPP</button>
+      </div>
+    </div>
+
+    <!-- SA-SAMS EXPORT -->
+    <div id="export" class="tab-content hidden">
+      <div class="card p-6 rounded-xl">
+        <h3 class="text-xl font-800 mb-4">DBE SA-SAMS EXPORT HUB</h3>
+        <p class="text-sm text-slate-400 mb-4">Export in DBE Provincial Format. Upload to SA-SAMS once per term.</p>
+        <div class="grid md:grid-cols-3 gap-3">
+          <button onclick="exportSAMS('enrolment')" class="btn-blue p-4 rounded-lg">EXPORT ENROLMENT CSV</button>
+          <button onclick="exportSAMS('marks')" class="btn-blue p-4 rounded-lg">EXPORT MARKS CSV</button>
+          <button onclick="exportSAMS('attendance')" class="btn-blue p-4 rounded-lg">EXPORT ATTENDANCE CSV</button>
+        </div>
+        <p class="text-xs text-slate-500 mt-3">Format: Matches SA-SAMS v2024.3 Import Template</p>
+      </div>
+    </div>
+
+    <!-- AUDIT LOG -->
+    <div id="audit" class="tab-content hidden">
+      <div class="card p-6 rounded-xl">
+        <h3 class="text-xl font-800 mb-4">Audit Log - Fraud Proof</h3>
+        <table class="w-full text-xs"><thead><tr class="text-left text-slate-400 border-b"><th>Time</th><th>User</th><th>Action</th><th>Details</th></tr></thead><tbody id="auditTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- PARENT VIEW -->
+    <div id="parentView" class="hidden">
+      <div class="card p-6 rounded-xl mb-4"><h3 class="text-2xl font-800">Thabo Mokoena | Grade 10A</h3></div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="card p-4 rounded-xl"><h4 class="font-800 mb-2">Fees Statement</h4><p>Balance: <b id="pBalance" class="text-red-400">R0</b></p><button class="btn w-full mt-3 py-2 rounded-lg">PAY NOW</button></div>
+        <div class="card p-4 rounded-xl"><h4 class="font-800 mb-2">Latest Marks</h4><div id="parentMarks"></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let DB = {
+  learners: [{id:'L001', name:'Thabo Mokoena', grade:'10A', parentCode:'P-THABO2026', idno:'0601015000087'}],
+  fees: [{learnerId:'L001', amount:2500, paid:1500}],
+  marks: [
+    {learnerId:'L001', subject:'Mathematics', mark:85, term:'T3'},
+    {learnerId:'L001', subject:'Science', mark:42, term:'T3'}, // At risk
+    {learnerId:'L001', subject:'English', mark:72, term:'T3'}
+  ],
+  audit: []
+};
+let CURRENT_ROLE = '';
+let CURRENT_USER = 'Admin';
+
+function logAudit(action, details){
+  DB.audit.unshift({time:new Date().toLocaleString(), user:CURRENT_USER, action, details});
+}
+
+function login(){
+  CURRENT_ROLE = document.getElementById('roleSelect').value;
+  const code = document.getElementById('parentCode').value;
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  document.getElementById('userRole').innerText = 'Role: ' + CURRENT_ROLE.toUpperCase();
+  logAudit('LOGIN', 'Role: ' + CURRENT_ROLE);
+  
+  if(CURRENT_ROLE === 'parent'){
+    document.getElementById('tabs').classList.add('hidden');
+    document.getElementById('parentView').classList.remove('hidden');
+    renderParent(code);
+  } else { renderAll(); }
+  applyPermissions();
+}
+
+function logout(){ logAudit('LOGOUT',''); location.reload(); }
+
+function applyPermissions(){
+  document.querySelectorAll('.admin-only').forEach(el => el.classList.toggle('hidden', CURRENT_ROLE!== 'admin'));
+  document.querySelectorAll('.finance-only').forEach(el => el.classList.toggle('hidden',!['admin','finance'].includes(CURRENT_ROLE)));
+  document.querySelectorAll('.teacher-only').forEach(el => el.classList.toggle('hidden',!['admin','teacher'].includes(CURRENT_ROLE)));
+}
+
+function showTab(id){
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
+  document.getElementById(id).classList.remove('hidden');
+  event.target.classList.add('tab-active');
+  renderAll();
+}
+
+function renderAll(){
+  document.getElementById('statLearners').innerText = DB.learners.length;
+  const totalBal = DB.fees.reduce((s,f)=>s+(f.amount-f.paid),0);
+  document.getElementById('statFees').innerText = 'R' + totalBal;
+  const avg = DB.marks.reduce((s,m)=>s+m.mark,0)/DB.marks.length || 0;
+  document.getElementById('statAvg').innerText = avg.toFixed(0) + '%';
+  const risk = DB.marks.filter(m=>m.mark<50).length;
+  document.getElementById('statRisk').innerText = risk;
+  
+  document.getElementById('feesTable').innerHTML = DB.fees.map(f=>{
+    const l = DB.learners.find(x=>x.id===f.learnerId);
+    return `<tr class="border-b"><td>${l.name}</td><td>R${f.amount}</td><td>R${f.paid}</td><td>R${f.amount-f.paid}</td><td><button onclick="payFee('${f.learnerId}')" class="btn text-xs px-2 py-1 rounded">PAY</button></td></tr>`
+  }).join('');
+  
+  document.getElementById('marksTable').innerHTML = DB.marks.map(m=>{
+    const l = DB.learners.find(x=>x.id===m.learnerId);
+    const color = m.mark<50?'text-red-400':'';
+    return `<tr class="border-b ${color}"><td>${l.name}</td><td>${m.subject}</td><td>${m.mark}%</td><td>${m.term}</td></tr>`
+  }).join('');
+  
+  document.getElementById('auditTable').innerHTML = DB.audit.slice(0,20).map(a=>`<tr class="border-b"><td>${a.time}</td><td>${a.user}</td><td>${a.action}</td><td>${a.details}</td></tr>`).join('');
+  
+  const baseURL = window.location.origin + window.location.pathname + '?parent=';
+  document.getElementById('parentURL').value = baseURL + 'P-THABO2026';
+}
+
+function renderParent(code){
+  const l = DB.learners.find(x=>x.parentCode===code);
+  if(!l) return alert('Invalid Parent Code');
+  const marks = DB.marks.filter(m=>m.learnerId===l.id);
+  const bal = DB.fees.find(f=>f.learnerId===l.id);
+  document.getElementById('pBalance').innerText = 'R' + (bal.amount-bal.paid);
+  document.getElementById('parentMarks').innerHTML = marks.map(m=>`<p>${m.subject}: <b>${m.mark}%</b></p>`).join('');
+}
+
+// WORLD TIER FUNCTIONS
+function addFee(){
+  const amt = prompt('Fee Amount R');
+  if(amt){ DB.fees.push({learnerId:'L001', amount:parseInt(amt), paid:0}); logAudit('ADD_FEE', 'R'+amt); renderAll(); }
+}
+function payFee(id){
+  const f = DB.fees.find(x=>x.learnerId===id);
+  const pay = prompt('Amount to pay R');
+  if(pay){ f.paid += parseInt(pay); logAudit('PAY_FEE', 'R'+pay); renderAll(); }
+}
+function addMark(){
+  const sub = prompt('Subject');
+  const mark = prompt('Mark %');
+  if(sub && mark){ 
+    DB.marks.push({learnerId:'L001', subject:sub, mark:parseInt(mark), term:'T3'}); 
+    logAudit('ADD_MARK', `${sub}:${mark}%`);
+    if(mark<50) sendWhatsAppAlert('42% in Science. Please intervene.');
+    renderAll(); 
+  }
+}
+function copyLink(){ navigator.clipboard.writeText(document.getElementById('parentURL').value); alert('Link Copied!'); }
+function sendWhatsApp(){ window.open('https://wa.me/?text=' + encodeURIComponent(document.getElementById('parentURL').value)); }
+function sendWhatsAppAlert(msg){ console.log('WHATSAPP SENT:', msg); logAudit('WHATSAPP', msg); } // Replace with API
+
+function exportPDF(){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.text('SPARSHUB ACADEMY - REPORT CARD', 20, 20);
+  DB.marks.forEach((m,i)=>doc.text(`${m.subject}: ${m.mark}%`, 20, 40+i*10));
+  doc.save('Report_T3.pdf');
+  logAudit('EXPORT_PDF','Report Card');
+}
+
+// SA-SAMS EXPORT = WORLD TIER
+function exportSAMS(type){
+  let csv = '';
+  if(type==='enrolment'){
+    csv = 'LearnerID,Name,Surname,Grade,IDNumber\n';
+    DB.learners.forEach(l=>{
+      const [name,...surname] = l.name.split(' ');
+      csv += `${l.id},${name},${surname.join(' ')},${l.grade},${l.idno}\n`;
+    });
+  }
+  if(type==='marks'){
+    csv = 'LearnerID,Subject,Mark,Term\n';
+    DB.marks.forEach(m=>csv += `${m.learnerId},${m.subject},${m.mark},${m.term}\n`);
+  }
+  if(type==='attendance'){
+    csv = 'LearnerID,Date,Status\nL001,2026-09-04,P\n'; // Demo
+  }
+  downloadCSV(csv, `SA-SAMS_${type}_2026.csv`);
+  logAudit('EXPORT_SAMS', type);
+}
+
+function importMarks(event){
+  const file = event.target.files[0];
+  const reader = new FileReader();
+  reader.onload = e => {
+    const rows = e.target.result.split('\n').slice(1);
+    rows.forEach(r=>{
+      const [id,sub,mark,term] = r.split(',');
+      if(id) DB.marks.push({learnerId:id, subject:sub, mark:parseInt(mark), term});
+    });
+    logAudit('BULK_IMPORT', rows.length+' marks');
+    renderAll();
+  };
+  reader.readAsText(file);
+}
+
+function downloadCSV(csv, filename){
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+}
+
+// Auto-login via URL
+const urlParams = new URLSearchParams(window.location.search);
+const pCode = urlParams.get('parent');
+if(pCode){ document.getElementById('roleSelect').value = 'parent'; document.getElementById('parentCode').value = pCode; login(); }
+document.getElementById('roleSelect').onchange = (e)=>{
+  document.getElementById('parentCode').classList.toggle('hidden', e.target.value!== 'parent');
+}
+</script>
+</body>
+</html>
