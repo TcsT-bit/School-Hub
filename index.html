@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sparshub EDU-ERP v1.5.2 HAVEN OF HAVENS</title>
+<title>Sparshub EDU-ERP v1.6.0 GOD MODE</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -27,17 +27,17 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
 <div id="app" class="max-w-7xl mx-auto p-4">
   <div id="loginScreen" class="flex items-center justify-center min-h-screen">
     <div class="card p-8 rounded-2xl w-full max-w-md">
-      <h1 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB HAVEN v1.5.2</h1>
-      <p class="text-center text-sm text-slate-400 mb-6">SA-SAMS + TEACHER HAVEN + STAFF OS</p>
-      <input id="emisCode" type="text" placeholder="EMIS Code e.g. 909101234" class="w-full bg-slate-800 p-3 rounded-lg mb-3">
-      <select id="roleSelect" class="w-full bg-slate-800 p-3 rounded-lg mb-3">
+      <h1 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB HAVEN v1.6.0</h1>
+      <p class="text-center text-sm text-slate-400 mb-6">SA-SAMS + TEACHER HAVEN + STAFF OS + GOD MODE</p>
+      <input id="emisCode" type="text" placeholder="EMIS Code e.g. 909101234" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600">
+      <select id="roleSelect" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600">
         <option value="admin">PRINCIPAL / HOD</option>
         <option value="finance">FINANCE</option>
         <option value="teacher">TEACHER</option>
         <option value="parent">PARENT PORTAL</option>
       </select>
-      <input id="teacherCode" type="text" placeholder="Teacher Code e.g. T-MATH001" class="w-full bg-slate-800 p-3 rounded-lg mb-3 hidden">
-      <input id="parentCode" type="text" placeholder="Parent Code e.g. P-THABO2026" class="w-full bg-slate-800 p-3 rounded-lg mb-4 hidden">
+      <input id="teacherCode" type="text" placeholder="Teacher Code e.g. T-MATH001" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600 hidden">
+      <input id="parentCode" type="text" placeholder="Parent Code e.g. P-THABO2026" class="w-full bg-slate-800 p-3 rounded-lg mb-4 border-slate-600 hidden">
       <button onclick="login()" class="btn w-full p-3 rounded-lg">ENTER HAVEN</button>
       <p class="text-xs text-slate-500 mt-3">Demo: EMIS 909101234 | Teacher T-MATH001 | Parent P-THABO2026</p>
     </div>
@@ -49,6 +49,7 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
     </header>
     <div id="tabs" class="flex gap-6 border-b border-slate-700 mb-6 overflow-x-auto">
       <button class="tab-btn tab-active pb-2" onclick="showTab('dashboard')">DASHBOARD</button>
+      <button class="tab-btn pb-2 admin-only" onclick="showTab('students')">STUDENTS</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('staff')">STAFF MANAGEMENT</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('workflow')">TEACHER WORKFLOW</button>
       <button class="tab-btn pb-2 teacher-only" onclick="showTab('upload')">UPLOAD HUB</button>
@@ -61,7 +62,8 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
       <button class="tab-btn pb-2 admin-only" onclick="showTab('audit')">AUDIT LOG</button>
     </div>
     <div id="dashboard" class="tab-content"><div class="grid md:grid-cols-4 gap-4"><div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">Learners</p><p id="statLearners" class="text-3xl font-800">2</p></div><div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">Staff Active</p><p id="statTeachers" class="text-3xl font-800">2</p></div><div class="card p-4 rounded-xl admin-only finance-only"><p class="text-sm text-slate-400">Fees Owing</p><p id="statFees" class="text-3xl font-800 text-red-400">R0</p></div><div class="card p-4 rounded-xl"><p class="text-sm text-slate-400">NSC Status</p><p id="statNSC" class="text-lg font-800">OPEN</p></div></div></div>
-    <div id="staff" class="tab-content hidden"><div class="card p-6 rounded-xl mb-4"><h3 class="text-xl font-800 mb-4">Staff Management</h3><div class="grid md:grid-cols-4 gap-3"><input id="staffName" placeholder="Full Name" class="bg-slate-800 p-3 rounded-lg"><select id="staffRole" class="bg-slate-800 p-3 rounded-lg"><option value="teacher">TEACHER</option><option value="hod">HOD</option><option value="finance">FINANCE</option><option value="admin">ADMIN</option></select><select id="staffDept" class="bg-slate-800 p-3 rounded-lg"><option>Mathematics</option><option>Science</option><option>English</option><option>Finance</option><option>Admin</option></select><button onclick="addStaff()" class="btn px-4 py-2 rounded-lg">+ ADD STAFF</button></div></div><div class="card p-6 rounded-xl"><h4 class="font-800 mb-3">All Staff</h4><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Code</th><th>Name</th><th>Role</th><th>Dept</th><th>Status</th><th>Action</th></tr></thead><tbody id="staffTable"></tbody></table></div></div>
+    <div id="students" class="tab-content hidden"><div class="card p-6 rounded-xl mb-4"><h3 class="text-xl font-800 mb-4">Add Learner - SA-SAMS Manual Entry</h3><div class="grid md:grid-cols-5 gap-3 mb-4"><input id="stuName" placeholder="Full Name" class="bg-slate-800 p-3 rounded-lg"><input id="stuGrade" placeholder="Grade e.g. 10A" class="bg-slate-800 p-3 rounded-lg"><input id="stuID" placeholder="ID Number" class="bg-slate-800 p-3 rounded-lg"><input id="stuParent" placeholder="Parent Code" class="bg-slate-800 p-3 rounded-lg"><button onclick="addStudent()" class="btn px-4 py-2 rounded-lg">+ ADD LEARNER</button></div></div><div class="card p-6 rounded-xl"><h4 class="font-800 mb-3">All Learners</h4><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>ID</th><th>Name</th><th>Grade</th><th>ID No</th><th>Parent Code</th></tr></thead><tbody id="stuTable"></tbody></table></div></div>
+    <div id="staff" class="tab-content hidden"><div class="card p-6 rounded-xl mb-4"><h3 class="text-xl font-800 mb-4">Staff Management</h3><div class="grid md:grid-cols-4 gap-3 mb-4"><input id="staffName" placeholder="Full Name" class="bg-slate-800 p-3 rounded-lg"><select id="staffRole" class="bg-slate-800 p-3 rounded-lg"><option value="teacher">TEACHER</option><option value="hod">HOD</option><option value="finance">FINANCE</option><option value="admin">ADMIN</option></select><input id="staffDept" placeholder="Type Dept e.g. Life Orientation" class="bg-slate-800 p-3 rounded-lg"><button onclick="addStaff()" class="btn px-4 py-2 rounded-lg">+ ADD STAFF</button></div></div><div class="card p-6 rounded-xl"><h4 class="font-800 mb-3">All Staff</h4><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Code</th><th>Name</th><th>Role</th><th>Dept</th><th>Status</th><th>Action</th></tr></thead><tbody id="staffTable"></tbody></table></div></div>
     <div id="workflow" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Teacher Workflow</h3><div id="workflowList"></div></div></div>
     <div id="upload" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Upload Hub</h3><input id="uploadTitle" placeholder="Test Name" class="w-full bg-slate-800 p-3 rounded-lg mb-3"><textarea id="uploadComment" placeholder="Comment for Parents" class="w-full bg-slate-800 p-3 rounded-lg mb-3"></textarea><button onclick="uploadDoc()" class="btn w-full p-3 rounded-lg">UPLOAD</button><div id="myUploads" class="mt-4"></div></div></div>
     <div id="tasks" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Tasks</h3><input id="taskTitle" placeholder="Task" class="bg-slate-800 p-3 rounded-lg mb-3 w-full"><select id="taskTeacher" class="bg-slate-800 p-3 rounded-lg mb-3 w-full"></select><button onclick="addTask()" class="btn px-4 py-2 rounded-lg">ASSIGN</button><div id="taskList" class="mt-4"></div></div></div>
@@ -100,6 +102,7 @@ function renderAll(){
   document.getElementById('statTeachers').innerText=DB.teachers.filter(t=>t.active).length;
   document.getElementById('statFees').innerText='R'+DB.fees.reduce((s,f)=>s+(f.amount-f.paid),0);
   document.getElementById('statNSC').innerText=DB.nscLocked?'LOCKED':'OPEN';
+  document.getElementById('stuTable').innerHTML=all.map(l=>`<tr><td>${l.id}</td><td>${l.name}</td><td>${l.grade}</td><td>${l.idno}</td><td>${l.parentCode}</td></tr>`).join('');
   document.getElementById('staffTable').innerHTML=DB.teachers.map(t=>`<tr class="${t.active?'':'inactive'}"><td>${t.code}</td><td>${t.name}</td><td>${t.role}</td><td>${t.dept}</td><td>${t.active?'ACTIVE':'INACTIVE'}</td><td><button onclick="toggleStaff('${t.code}')" class="btn-gray text-xs px-2 py-1 rounded">${t.active?'DEACTIVATE':'ACTIVATE'}</button></td></tr>`).join('');
   document.getElementById('workflowList').innerHTML=DB.teachers.filter(t=>t.role==='teacher').map(t=>`<div class="card p-3 mb-2 ${DB.tasks.filter(x=>x.teacher===t.code&&x.status==='late').length?'late':'done'}"><p>${t.name} - ${t.dept}</p></div>`).join('');
   if(CURRENT_ROLE==='teacher'){document.getElementById('myUploads').innerHTML=DB.uploads.filter(u=>u.teacher===CURRENT_TEACHER).map(u=>`<div class="card p-2 mb-2">${u.title}</div>`).join('')||'No uploads';}
@@ -110,7 +113,8 @@ function renderAll(){
   document.getElementById('parentURL').value=window.location.href+'?parent=P-THABO2026';
 }
 function renderParent(code){const l=[...DB.learners,...DB.learnersG12].find(x=>x.parentCode===code);if(!l)return alert('Invalid');document.getElementById('parentMarks').innerHTML=DB.marks.filter(m=>m.learnerId===l.id).map(m=>`<p>${m.subject}: ${m.mark}%</p>`).join('');document.getElementById('parentVault').innerHTML=DB.uploads.map(u=>`<div class="card p-3 mb-2">${u.title}<p class="text-sm">${u.comment}</p></div>`).join('');}
-function addStaff(){const name=document.getElementById('staffName').value;const role=document.getElementById('staffRole').value;const dept=document.getElementById('staffDept').value;if(!name)return alert('Name?');const code=`${role[0].toUpperCase()}-${dept.slice(0,4).toUpperCase()}${DB.teachers.length+1}`;DB.teachers.push({code,name,role,dept,active:true});alert('Code: '+code);renderAll();}
+function addStudent(){const name=document.getElementById('stuName').value;const grade=document.getElementById('stuGrade').value;const idno=document.getElementById('stuID').value;const parent=document.getElementById('stuParent').value;if(!name||!grade||!idno||!parent)return alert('Fill all');const id='L'+String([...DB.learners,...DB.learnersG12].length+1).padStart(3,'0');const newStu={id,name,grade,parentCode:parent,idno};if(grade.startsWith('12'))DB.learnersG12.push(newStu);else DB.learners.push(newStu);alert('ID: '+id);renderAll();}
+function addStaff(){const name=document.getElementById('staffName').value;const role=document.getElementById('staffRole').value;const dept=document.getElementById('staffDept').value;if(!name||!dept)return alert('Name + Dept?');const code=`${role[0].toUpperCase()}-${dept.slice(0,4).toUpperCase().replace(/\s/g,'')}${DB.teachers.length+1}`;DB.teachers.push({code,name,role,dept,active:true});alert('Code: '+code);renderAll();}
 function toggleStaff(code){const t=DB.teachers.find(x=>x.code===code);t.active=!t.active;renderAll();}
 function uploadDoc(){const title=document.getElementById('uploadTitle').value;const comment=document.getElementById('uploadComment').value;if(!title)return alert('Title?');DB.uploads.push({title,comment,teacher:CURRENT_TEACHER});renderAll();}
 function addTask(){const title=document.getElementById('taskTitle').value;const teacher=document.getElementById('taskTeacher').value;if(!title)return alert('Title?');DB.tasks.push({id:'T'+Date.now(),title,teacher,status:'late'});renderAll();}
@@ -120,7 +124,7 @@ function payFee(id){const p=prompt('Pay R');if(p){DB.fees.find(f=>f.learnerId===
 function addMark(){if(DB.nscLocked)return alert('NSC LOCKED');const m=prompt('Mark %');if(m){DB.marks.push({learnerId:'L001',subject:'Math',mark:+m,term:'T3'});renderAll();}}
 function checkNSCLock(){if(new Date().getMonth()===10&&new Date().getDate()>=15){DB.nscLocked=true;document.getElementById('marksCard').classList.add('locked');document.getElementById('nscLockMsg').classList.remove('hidden');}document.getElementById('nscStatus').innerText='Status: '+(DB.nscLocked?'LOCKED':'OPEN');}
 function lockNSC(){DB.nscLocked=true;renderAll();checkNSCLock();}
-function exportDBE(){const csv='EMIS,Name,Mark\n909101234,Thabo,85';const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='EMIS_EXPORT.csv';a.click();}
+function exportDBE(){const csv='EMIS,Name,Mark\n909101234,Thabo,85';const blob=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='EMIS_EXPORT.csv';a.click();logAudit('DBE_EXPORT','ALL');}
 function copyLink(){navigator.clipboard.writeText(document.getElementById('parentURL').value);alert('Copied');}
 const p=new URLSearchParams(window.location.search).get('parent');if(p){document.getElementById('roleSelect').value='parent';document.getElementById('parentCode').value=p;login();}
 document.getElementById('roleSelect').onchange=e=>{document.getElementById('teacherCode').classList.toggle('hidden',e.target.value!=='teacher');document.getElementById('parentCode').classList.toggle('hidden',e.target.value!=='parent');};
