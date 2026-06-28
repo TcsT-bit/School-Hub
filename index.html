@@ -3,47 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sparshub EDU-ERP v2.1 TEACHER OS</title>
+<title>Sparshub EDU-ERP v2.2 GOD TIER TEACHER OS</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Sparshub Haven&quot;,&quot;short_name&quot;:&quot;Haven&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#0f172a&quot;,&quot;theme_color&quot;:&quot;#16a34a&quot;}">
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--border:#334155;--accent:#16a34a}
 .light{--bg:#f8fafc;--card:#ffffff;--border:#e2e8f0;--accent:#15803d}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:#e2e8f0;transition:.3s}
 .light body{color:#0f172a}
-.card{background:var(--card);border:1px solid var(--border)}
-.btn{background:var(--accent);color:#000;font-weight:800}
+.card{background:var(--card);border:1px solid var(--border);backdrop-filter:blur(10px)}
+.btn{background:var(--accent);color:#000;font-weight:800;transition:.2s}
+.btn:hover{filter:brightness(1.1) scale(1.02)}
 .btn-red{background:#dc2626;color:#fff}.btn-blue{background:#2563eb;color:#fff}
+.btn-yellow{background:#f59e0b;color:#000}.btn-purple{background:#9333ea;color:#fff}
+.btn-gray{background:#475569;color:#fff}
 .tab-active{border-bottom:3px solid var(--accent);color:var(--accent)}
-.hidden{display:none}.locked{background:#450a0a}
+.hidden{display:none}.locked{background:#450a0a;border-color:#dc2626}
+.late{border-left:4px solid #dc2626}.done{border-left:4px solid var(--accent)}
+.inactive{opacity:0.5}.glass{background:rgba(30,41,59,0.6)}
+.light.glass{background:rgba(255,255,255,0.6)}
 .at-risk{color:#f87171;font-weight:800}
 .present{background:#16a34a;color:#000}.absent{background:#dc2626;color:#fff}.late{background:#f59e0b;color:#000}
 </style>
 </head>
 <body class="min-h-screen">
-<div id="app" class="max-w-7xl mx-auto p-4">
+<div id="app" class="max-w-7xl mx-auto p-4 fade-in">
+
+  <!-- TOP BAR -->
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-800 text-[#16a34a]">SPARSHUB v2.2 TEACHER OS</h1>
+    <div class="flex gap-2">
+      <button onclick="toggleTheme()" class="btn-gray px-3 py-2 rounded-lg text-sm">🌓</button>
+      <button onclick="installPWA()" id="installBtn" class="btn-blue px-3 py-2 rounded-lg text-sm hidden">📲 Install</button>
+    </div>
+  </div>
 
   <!-- LOGIN -->
   <div id="loginScreen" class="flex items-center justify-center min-h-[80vh]">
-    <div class="card p-8 rounded-2xl w-full max-w-md">
-      <h2 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB v2.1</h2>
-      <p class="text-center text-sm text-slate-400 mb-6">TEACHER COMMAND CENTER</p>
+    <div class="card p-8 rounded-2xl w-full max-w-md glass">
+      <h2 class="text-3xl font-800 text-center text-[#16a34a] mb-2">ENTER HAVEN</h2>
+      <p class="text-center text-sm text-slate-400 mb-6">AI-Powered School OS</p>
       <input id="emisCode" type="text" placeholder="EMIS: 909101234" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-3">
       <select id="roleSelect" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-3" onchange="toggleRoleFields()">
-        <option value="admin">PRINCIPAL</option><option value="finance">FINANCE</option><option value="teacher">TEACHER</option><option value="parent">PARENT</option>
+        <option value="admin">PRINCIPAL / HOD</option><option value="finance">FINANCE</option><option value="teacher">TEACHER</option><option value="parent">PARENT</option>
       </select>
-      <input id="teacherCode" type="text" placeholder="T-MATH001" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-3 hidden">
-      <input id="parentCode" type="text" placeholder="P-THABO2026" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-4 hidden">
+      <input id="teacherCode" type="text" placeholder="Teacher: T-MATH001" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-3 hidden">
+      <input id="parentCode" type="text" placeholder="Parent: P-THABO2026" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-4 hidden">
       <button onclick="login()" class="btn w-full p-3 rounded-lg">LOGIN</button>
+      <div class="grid grid-cols-2 gap-2 mt-3 text-xs">
+        <button onclick="quickLogin('admin')" class="btn-gray p-2 rounded">Quick: Principal</button>
+        <button onclick="quickLogin('teacher')" class="btn-gray p-2 rounded">Quick: Teacher</button>
+      </div>
     </div>
   </div>
 
   <!-- MAIN APP -->
   <div id="mainApp" class="hidden">
-    <header class="flex justify-between items-center mb-6">
-      <div><h2 class="text-2xl font-800 text-[#16a34a]">SPARSHUB <span id="emisBadge" class="text-sm bg-blue-600 px-2 py-1 rounded"></span></h2><p id="userRole" class="text-sm text-slate-400"></p></div>
-      <button onclick="logout()" class="btn-red px-4 py-2 rounded-lg text-sm">LOGOUT</button>
+    <header class="flex flex-wrap justify-between items-center mb-6 gap-3">
+      <div>
+        <h2 class="text-2xl font-800 text-[#16a34a]">SPARSHUB ACADEMY <span id="emisBadge" class="text-sm bg-blue-600 px-2 py-1 rounded"></span></h2>
+        <p id="userRole" class="text-sm text-slate-400"></p>
+      </div>
+      <div class="flex gap-2">
+        <input id="globalSearch" oninput="searchAll(this.value)" placeholder="🔍 Search..." class="bg-slate-800 light:bg-slate-100 p-2 rounded-lg text-sm w-48">
+        <button onclick="logout()" class="btn-red px-4 py-2 rounded-lg text-sm">LOGOUT</button>
+      </div>
     </header>
 
     <!-- TABS -->
@@ -51,11 +77,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#e2e8f0;transitio
       <button class="tab-btn tab-active pb-2" onclick="showTab('dashboard')">📊 DASHBOARD</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('students')">🎓 STUDENTS</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('staff')">👨‍🏫 STAFF</button>
-      <button class="tab-btn pb-2 teacher-only" onclick="showTab('myclasses')">🏫 MY CLASSES</button> <!-- NEW -->
+      <button class="tab-btn pb-2 teacher-only" onclick="showTab('myclasses')">🏫 MY CLASSES</button> <!-- GOD TIER -->
       <button class="tab-btn pb-2 teacher-only" onclick="showTab('upload')">📁 UPLOAD</button>
       <button class="tab-btn pb-2 admin-only teacher-only" onclick="showTab('tasks')">✅ TASKS</button>
       <button class="tab-btn pb-2 admin-only teacher-only" onclick="showTab('marks')">📈 MARKS</button>
       <button class="tab-btn pb-2 admin-only finance-only" onclick="showTab('fees')">💰 FEES</button>
+      <button class="tab-btn pb-2 admin-only" onclick="showTab('reports')">📄 REPORTS</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('export')">📤 EXPORT</button>
       <button class="tab-btn pb-2 admin-only" onclick="showTab('audit')">📜 AUDIT</button>
     </div>
@@ -63,13 +90,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#e2e8f0;transitio
     <!-- DASHBOARD -->
     <div id="dashboard" class="tab-content"></div>
 
-    <!-- MY CLASSES = GOD TIER TEACHER TAB -->
+    <!-- MY CLASSES = NEW GOD TIER -->
     <div id="myclasses" class="tab-content hidden">
       <div class="card p-6 rounded-xl mb-4">
         <div class="flex flex-wrap gap-3 mb-4">
           <select id="classFilter" onchange="renderMyClass()" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"></select>
           <button onclick="toggleAttendanceMode()" class="btn-blue px-4 py-2 rounded-lg">📋 ATTENDANCE</button>
           <button onclick="saveAllMarks()" class="btn px-4 py-2 rounded-lg">💾 SAVE ALL MARKS</button>
+          <button onclick="alertAtRisk()" class="btn-yellow px-4 py-2 rounded-lg">🚨 ALERT PARENTS</button>
         </div>
         <div id="classStats" class="grid md:grid-cols-4 gap-3 mb-4"></div>
       </div>
@@ -78,38 +106,75 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#e2e8f0;transitio
       </div>
     </div>
 
-    <!-- OTHER TABS OMITTED FOR SPACE... SAME AS BEFORE -->
-    <div id="students" class="tab-content hidden"></div>
-    <div id="staff" class="tab-content hidden"></div>
-    <div id="upload" class="tab-content hidden"></div>
-    <div id="tasks" class="tab-content hidden"></div>
-    <div id="marks" class="tab-content hidden"></div>
-    <div id="fees" class="tab-content hidden"></div>
-    <div id="export" class="tab-content hidden"></div>
-    <div id="audit" class="tab-content hidden"></div>
-    <div id="parentView" class="hidden"></div>
+    <!-- STUDENTS -->
+    <div id="students" class="tab-content hidden">
+      <div class="card p-6 rounded-xl mb-4">
+        <div class="flex justify-between mb-4"><h3 class="text-xl font-800">Add Learner</h3><input type="file" id="bulkStu" accept=".xlsx,.csv" onchange="bulkStudents(event)" class="hidden"><button onclick="document.getElementById('bulkStu').click()" class="btn-yellow px-3 py-2 rounded text-sm">📥 Bulk Import Excel</button></div>
+        <div class="grid md:grid-cols-5 gap-3"><input id="stuName" placeholder="Full Name" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><input id="stuGrade" placeholder="Grade 10A" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><input id="stuID" placeholder="ID Number" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><input id="stuParent" placeholder="Parent Code" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><button onclick="addStudent()" class="btn">+ ADD</button></div>
+      </div>
+      <div class="card p-6 rounded-xl"><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>ID</th><th>Name</th><th>Grade</th><th>Parent</th><th>Action</th></tr></thead><tbody id="stuTable"></tbody></table></div>
+    </div>
+
+    <!-- STAFF -->
+    <div id="staff" class="tab-content hidden">
+      <div class="card p-6 rounded-xl mb-4">
+        <h3 class="text-xl font-800 mb-4">Staff Management</h3>
+        <div class="grid md:grid-cols-4 gap-3"><input id="staffName" placeholder="Full Name" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><select id="staffRole" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><option value="teacher">TEACHER</option><option value="hod">HOD</option><option value="finance">FINANCE</option><option value="admin">ADMIN</option></select><input id="staffDept" placeholder="Any Subject" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><button onclick="addStaff()" class="btn">+ ADD</button></div>
+      </div>
+      <div class="card p-6 rounded-xl"><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Code</th><th>Name</th><th>Role</th><th>Dept</th><th>Status</th><th>Action</th></tr></thead><tbody id="staffTable"></tbody></table></div>
+    </div>
+
+    <!-- UPLOAD -->
+    <div id="upload" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Upload Hub</h3><input id="uploadTitle" placeholder="Test Name" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-3"><textarea id="uploadComment" placeholder="Comment for Parents" class="w-full bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-3"></textarea><button onclick="uploadDoc()" class="btn w-full p-3 rounded-lg">UPLOAD</button><div id="myUploads" class="mt-4"></div></div></div>
+
+    <!-- TASKS -->
+    <div id="tasks" class="tab-content hidden"><div class="card p-6 rounded-xl"><div class="grid md:grid-cols-3 gap-3 mb-4"><input id="taskTitle" placeholder="Task" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><input id="taskDue" type="date" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"><select id="taskTeacher" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg"></select></div><button onclick="addTask()" class="btn mb-4">ASSIGN</button><div id="taskList"></div></div></div>
+
+    <!-- MARKS -->
+    <div id="marks" class="tab-content hidden"><div class="card p-6 rounded-xl" id="marksCard"><p id="nscLockMsg" class="hidden text-red-400 mb-2">🔒 NSC LOCKED</p><div class="flex gap-2 mb-4"><button onclick="addMark()" class="btn">+ MARK</button><input type="file" id="bulkMarks" accept=".csv,.xlsx" class="hidden" onchange="bulkMarks(event)"><button onclick="document.getElementById('bulkMarks').click()" class="btn-yellow">BULK IMPORT</button></div><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Subject</th><th>Mark</th><th>Action</th></tr></thead><tbody id="marksTable"></tbody></table></div></div>
+
+    <!-- FEES -->
+    <div id="fees" class="tab-content hidden"><div class="card p-6 rounded-xl"><button onclick="addFee()" class="btn mb-4">+ FEE</button><table class="w-full text-sm"><thead><tr class="text-left text-slate-400 border-b"><th>Learner</th><th>Balance</th><th>WhatsApp</th><th>Action</th></tr></thead><tbody id="feesTable"></tbody></table></div></div>
+
+    <!-- REPORTS -->
+    <div id="reports" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Print Report Cards PDF</h3><select id="reportLearner" class="bg-slate-800 light:bg-slate-100 p-3 rounded-lg mb-3 w-full"></select><button onclick="printReport()" class="btn w-full p-3 rounded-lg">📄 GENERATE PDF REPORT</button></div></div>
+
+    <!-- EXPORT -->
+    <div id="export" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">DBE SA-SAMS EXPORT</h3><button onclick="exportDBE('all')" class="btn-purple w-full p-3 rounded-lg">DOWNLOAD ALL CSV</button></div></div>
+
+    <!-- AUDIT -->
+    <div id="audit" class="tab-content hidden"><div class="card p-6 rounded-xl"><h3 class="text-xl font-800 mb-4">Activity Timeline</h3><div id="auditTimeline" class="space-y-2"></div></div></div>
+
+    <!-- PARENT -->
+    <div id="parentView" class="hidden"><div class="card p-6 rounded-xl"><h3 class="text-2xl font-800">Parent Portal</h3><div id="parentMarks"></div><div id="parentVault"></div></div></div>
   </div>
 </div>
 <script>
-let DB=JSON.parse(localStorage.getItem('sparshubDB'))||{emis:'',nscLocked:false,teachers:[{code:'T-MATH001',name:'Mr Mokoena',role:'teacher',dept:'Mathematics',subjects:[{grade:'10A',subject:'Mathematics'}],active:true}],learners:[{id:'L001',name:'Thabo Mokoena',grade:'10A',parentCode:'P-THABO2026',idno:'0601015000087'},{id:'L002',name:'Lerato Khumalo',grade:'10A',parentCode:'P-LERATO',idno:'0702025000088'},{id:'L003',name:'Siya Ndlovu',grade:'10A',parentCode:'P-SIYA',idno:'0703035000089'}],learnersG12:[],fees:[],marks:[],attendance:{},uploads:[],tasks:[],audit:[]};
+let DB=JSON.parse(localStorage.getItem('sparshubDB'))||{emis:'',nscLocked:false,teachers:[{code:'T-MATH001',name:'Mr Mokoena',role:'teacher',dept:'Mathematics',subjects:[{grade:'10A',subject:'Mathematics'}],active:true}],learners:[{id:'L001',name:'Thabo Mokoena',grade:'10A',parentCode:'P-THABO2026',idno:'0601015000087'},{id:'L002',name:'Lerato Khumalo',grade:'10A',parentCode:'P-LERATO',idno:'0702025000088'},{id:'L003',name:'Siya Ndlovu',grade:'10A',parentCode:'P-SIYA',idno:'0703035000089'}],learnersG12:[],fees:[{learnerId:'L001',amount:2500,paid:1500}],marks:[{learnerId:'L001',subject:'Mathematics',mark:85,term:'T3'},{learnerId:'L002',subject:'Mathematics',mark:42,term:'T3'}],attendance:{},uploads:[],tasks:[],audit:[]};
 let CURRENT_ROLE='',CURRENT_TEACHER='',ATTENDANCE_MODE=false;
-
 function saveDB(){localStorage.setItem('sparshubDB',JSON.stringify(DB));}
+function logAudit(a,d){DB.audit.unshift({time:new Date().toLocaleString(),user:CURRENT_ROLE+(CURRENT_TEACHER?' '+CURRENT_TEACHER:''),action:a,details:d});saveDB();}
+
+function toggleTheme(){document.body.classList.toggle('light');}
 function toggleRoleFields(){const r=document.getElementById('roleSelect').value;document.getElementById('teacherCode').classList.toggle('hidden',r!=='teacher');document.getElementById('parentCode').classList.toggle('hidden',r!=='parent');}
+function quickLogin(r){document.getElementById('roleSelect').value=r;toggleRoleFields();document.getElementById('emisCode').value='909101234';if(r==='teacher')document.getElementById('teacherCode').value='T-MATH001';login();}
 
 function login(){
-  const emis=document.getElementById('emisCode').value.trim();const role=document.getElementById('roleSelect').value;const tCode=document.getElementById('teacherCode').value.trim();
-  if(!/^[0-9]{9}$/.test(emis))return alert('EMIS: 9 digits');if(role==='teacher'&&!tCode)return alert('Teacher Code?');
+  const emis=document.getElementById('emisCode').value.trim();const role=document.getElementById('roleSelect').value;const tCode=document.getElementById('teacherCode').value.trim();const pCode=document.getElementById('parentCode').value.trim();
+  if(!/^[0-9]{9}$/.test(emis))return alert('EMIS: 9 digits');if(role==='teacher'&&!tCode)return alert('Teacher Code?');if(role==='parent'&&!pCode)return alert('Parent Code?');
   DB.emis=emis;CURRENT_ROLE=role;CURRENT_TEACHER=tCode;
   const t=DB.teachers.find(x=>x.code===tCode);if(role==='teacher'&&(!t||!t.active))return alert('Invalid Teacher');
   document.getElementById('loginScreen').classList.add('hidden');document.getElementById('mainApp').classList.remove('hidden');
-  document.getElementById('emisBadge').innerText='EMIS:'+emis;document.getElementById('userRole').innerText=`${t.name} | ${t.dept}`;
-  if(role==='teacher'){document.querySelectorAll('.admin-only').forEach(el=>el.classList.add('hidden'));renderTeacherDashboard();}
-  renderAll();applyPermissions();
+  document.getElementById('emisBadge').innerText='EMIS:'+emis;document.getElementById('userRole').innerText=role==='teacher'?`${t.name} | ${t.dept}`:`Role: ${role.toUpperCase()}`;
+  if(role==='parent'){document.getElementById('tabs').classList.add('hidden');document.getElementById('parentView').classList.remove('hidden');renderParent(pCode);}
+  else{if(role==='teacher'){document.querySelectorAll('.admin-only').forEach(el=>el.classList.add('hidden'));renderTeacherDashboard();}renderAll();}
+  applyPermissions();checkNSCLock();
 }
 function logout(){location.reload();}
-function applyPermissions(){document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',CURRENT_ROLE!=='admin'));document.querySelectorAll('.teacher-only').forEach(el=>el.classList.toggle('hidden',!['admin','teacher'].includes(CURRENT_ROLE)));}
+function applyPermissions(){document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',CURRENT_ROLE!=='admin'));document.querySelectorAll('.finance-only').forEach(el=>el.classList.toggle('hidden',!['admin','finance'].includes(CURRENT_ROLE)));document.querySelectorAll('.teacher-only').forEach(el=>el.classList.toggle('hidden',!['admin','teacher'].includes(CURRENT_ROLE)));}
 function showTab(id){document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('tab-active'));document.getElementById(id).classList.remove('hidden');event.target.classList.add('tab-active');if(id==='myclasses')renderMyClass();}
+
+function searchAll(q){q=q.toLowerCase();document.querySelectorAll('tbody tr').forEach(tr=>{tr.style.display=tr.innerText.toLowerCase().includes(q)?'':'none';});}
 
 function renderTeacherDashboard(){
   const t=DB.teachers.find(x=>x.code===CURRENT_TEACHER);
@@ -137,15 +202,16 @@ function renderMyClass(){
     <div class="card p-3"><p class="text-xs text-slate-400">Learners</p><p class="text-xl font-800">${learners.length}</p></div>
     <div class="card p-3"><p class="text-xs text-slate-400">Class Avg</p><p class="text-xl font-800">${avg}%</p></div>
     <div class="card p-3"><p class="text-xs text-slate-400">At Risk <50%</p><p class="text-xl font-800 text-red-400">${atRisk}</p></div>
-    <div class="card p-3"><p class="text-xs text-slate-400">Attendance Today</p><p class="text-xl font-800">${Object.keys(att).length?Math.round(Object.values(att).filter(x=>x==='P').length/Object.keys(att).length*100):0}%</p></div>`;
+    <div class="card p-3"><p class="text-xs text-slate-400">Attendance</p><p class="text-xl font-800">${Object.keys(att).length?Math.round(Object.values(att).filter(x=>x==='P').length/Object.keys(att).length*100):0}%</p></div>`;
 
   let rows=`<thead><tr class="text-left text-slate-400 border-b"><th>#</th><th>Learner</th><th>Mark %</th>${ATTENDANCE_MODE?'<th>Attendance</th>':''}</tr></thead><tbody>`;
   learners.forEach((l,i)=>{
     const mark=marks.find(m=>m.learnerId===l.id)?.mark||'';
     const attStatus=att[l.id]||'P';
+    const riskClass=mark<50?'at-risk':'';
     rows+=`<tr class="border-b">
-      <td>${i+1}</td><td>${l.name}</td>
-      <td><input type="number" id="mark_${l.id}" value="${mark}" class="w-20 bg-slate-800 p-1 rounded" min="0" max="100"></td>
+      <td>${i+1}</td><td class="${riskClass}">${l.name}</td>
+      <td><input type="number" id="mark_${l.id}" value="${mark}" class="w-20 bg-slate-800 light:bg-slate-100 p-1 rounded" min="0" max="100"></td>
       ${ATTENDANCE_MODE?`<td><button onclick="setAtt('${grade}','${l.id}','P')" class="px-2 py-1 rounded text-xs ${attStatus==='P'?'present':''}">P</button>
       <button onclick="setAtt('${grade}','${l.id}','A')" class="px-2 py-1 rounded text-xs ${attStatus==='A'?'absent':''}">A</button>
       <button onclick="setAtt('${grade}','${l.id}','L')" class="px-2 py-1 rounded text-xs ${attStatus==='L'?'late':''}">L</button></td>`:''}
@@ -164,17 +230,70 @@ function saveAllMarks(){
       DB.marks.push({learnerId:l.id,subject,mark:+val,term:'T3'});
     }
   });
-  saveDB();alert('Marks Saved!');renderMyClass();
+  saveDB();logAudit('MARKS_SAVE',`${subject} ${grade}`);alert('Marks Saved!');renderMyClass();
 }
 
 function toggleAttendanceMode(){ATTENDANCE_MODE=!ATTENDANCE_MODE;renderMyClass();}
 function setAtt(grade,id,status){if(!DB.attendance[grade])DB.attendance[grade]={};DB.attendance[grade][id]=status;saveDB();renderMyClass();}
+function alertAtRisk(){
+  const [grade,subject]=document.getElementById('classFilter').value.split('|');
+  const learners=DB.learners.filter(l=>l.grade===grade);
+  const atRisk=learners.filter(l=>{const m=DB.marks.find(x=>x.learnerId===l.id&&x.subject===subject);return m&&m.mark<50;});
+  if(!atRisk.length)return alert('No At-Risk learners');
+  atRisk.forEach(l=>whatsappParent(l.parentCode,`Alert: ${l.name} is below 50% in ${subject}. Please assist.`));
+  logAudit('ALERT_AT_RISK',`${atRisk.length} parents`);
+}
 
-function renderAll(){/* Admin tabs same as v2.0 */}
+function renderAll(){
+  const all=[...DB.learners,...DB.learnersG12];const pass=all.length?Math.round(DB.marks.filter(m=>m.mark>=50).length/DB.marks.length*100)||0:0;
+  document.getElementById('statLearners').innerText=all.length;document.getElementById('statTeachers').innerText=DB.teachers.filter(t=>t.active).length;
+  document.getElementById('statFees').innerText='R'+DB.fees.reduce((s,f)=>s+(f.amount-f.paid),0);document.getElementById('statPass').innerText=pass+'%';
 
-// Stubs for other functions
-function addStudent(){}function addStaff(){}function uploadDoc(){}function addTask(){}function addFee(){}function exportDBE(){}
+  const grades={};all.forEach(l=>{grades[l.grade]=(grades[l.grade]||0)+1});document.getElementById('gradeChart').innerHTML=Object.entries(grades).map(([g,c])=>`<div class="flex justify-between mb-1"><span>${g}</span><div class="w-32 bg-slate-700 rounded"><div class="bg-[#16a34a] h-2 rounded" style="width:${c/all.length*100}%"></div></div><span>${c}</span></div>`).join('');
+
+  document.getElementById('stuTable').innerHTML=all.map(l=>`<tr class="border-b"><td>${l.id}</td><td>${l.name}</td><td>${l.grade}</td><td>${l.parentCode}</td><td><button onclick="deleteStudent('${l.id}')" class="btn-red text-xs px-2 py-1 rounded">DEL</button></td></tr>`).join('');
+  document.getElementById('staffTable').innerHTML=DB.teachers.map(t=>`<tr class="border-b ${t.active?'':'inactive'}"><td>${t.code}</td><td>${t.name}</td><td>${t.role}</td><td>${t.dept}</td><td>${t.active?'ACTIVE':'INACTIVE'}</td><td><button onclick="toggleStaff('${t.code}')" class="btn-gray text-xs px-2 py-1 rounded">${t.active?'DEACTIVATE':'ACTIVATE'}</button></td></tr>`).join('');
+  document.getElementById('taskTeacher').innerHTML=DB.teachers.filter(t=>t.active&&t.role==='teacher').map(t=>`<option value="${t.code}">${t.name}</option>`).join('');
+  document.getElementById('taskList').innerHTML=DB.tasks.map(t=>{const teacher=DB.teachers.find(x=>x.code===t.teacher);return `<div class="card p-3 mb-2 ${t.status}"><p>${t.title}</p><p class="text-sm">${teacher?.name} | ${t.due}</p><button onclick="markDone('${t.id}')" class="btn text-xs">DONE</button></div>`}).join('');
+  document.getElementById('marksTable').innerHTML=DB.marks.map(m=>{const l=all.find(x=>x.id===m.learnerId);return `<tr class="border-b ${m.mark<50?'text-red-400':''}"><td>${l.name}</td><td>${m.subject}</td><td>${m.mark}%</td><td><button onclick="deleteMark('${m.learnerId}','${m.subject}')" class="btn-red text-xs">DEL</button></td></tr>`}).join('');
+  document.getElementById('feesTable').innerHTML=DB.fees.map(f=>{const l=all.find(x=>x.id===f.learnerId);const bal=f.amount-f.paid;return `<tr class="border-b"><td>${l.name}</td><td>R${bal}</td><td><button onclick="whatsappParent('${l.parentCode}','Balance: R${bal}')" class="btn-blue text-xs px-2 py-1">WA</button></td><td><button onclick="payFee('${f.learnerId}')" class="btn text-xs">PAY</button></td></tr>`}).join('');
+  document.getElementById('reportLearner').innerHTML=all.map(l=>`<option value="${l.id}">${l.name} - ${l.grade}</option>`).join('');
+  document.getElementById('auditTimeline').innerHTML=DB.audit.slice(0,20).map(a=>`<div class="card p-2 text-sm"><b>${a.time}</b> - ${a.user}: ${a.action} ${a.details}</div>`).join('');
+  if(CURRENT_ROLE==='teacher')document.getElementById('myUploads').innerHTML=DB.uploads.filter(u=>u.teacher===CURRENT_TEACHER).map(u=>`<div class="card p-2 mb-2">${u.title}</div>`).join('')||'No uploads';
+}
+
+function renderParent(code){const l=[...DB.learners,...DB.learnersG12].find(x=>x.parentCode===code);if(!l)return alert('Invalid');document.getElementById('parentMarks').innerHTML=DB.marks.filter(m=>m.learnerId===l.id).map(m=>`<p>${m.subject}: ${m.mark}%</p>`).join('');document.getElementById('parentVault').innerHTML=DB.uploads.map(u=>`<div class="card p-3 mb-2">${u.title}<p class="text-sm">${u.comment}</p></div>`).join('');}
+
+function addStudent(){const n=document.getElementById('stuName').value,g=document.getElementById('stuGrade').value,i=document.getElementById('stuID').value,p=document.getElementById('stuParent').value;if(!n||!g||!i||!p)return alert('Fill all');const id='L'+String([...DB.learners,...DB.learnersG12].length+1).padStart(3,'0');const s={id,name:n,grade:g,parentCode:p,idno:i};g.startsWith('12')?DB.learnersG12.push(s):DB.learners.push(s);logAudit('STUDENT_ADD',id);['stuName','stuGrade','stuID','stuParent'].forEach(x=>document.getElementById(x).value='');renderAll();}
+function deleteStudent(id){DB.learners=DB.learners.filter(l=>l.id!==id);DB.learnersG12=DB.learnersG12.filter(l=>l.id!==id);logAudit('STUDENT_DEL',id);renderAll();}
+function bulkStudents(e){const f=e.target.files[0];const r=new FileReader();r.onload=ev=>{const wb=XLSX.read(ev.target.result,{type:'binary'});const ws=wb.Sheets[wb.SheetNames[0]];XLSX.utils.sheet_to_json(ws).forEach(row=>{const id='L'+String([...DB.learners,...DB.learnersG12].length+1).padStart(3,'0');const s={id,name:row.Name,grade:row.Grade,parentCode:row.Parent,idno:row.ID};row.Grade.startsWith('12')?DB.learnersG12.push(s):DB.learners.push(s);});logAudit('BULK_STU',f.name);renderAll();};r.readAsBinaryString(f);}
+
+function addStaff(){const n=document.getElementById('staffName').value,r=document.getElementById('staffRole').value,d=document.getElementById('staffDept').value;if(!n||!d)return alert('Name+Dept?');const code=`${r[0].toUpperCase()}-${d.slice(0,4).toUpperCase()}${DB.teachers.length+1}`;DB.teachers.push({code,name:n,role:r,dept:d,subjects:[],active:true});logAudit('STAFF_ADD',code);renderAll();}
+function toggleStaff(code){const t=DB.teachers.find(x=>x.code===code);t.active=!t.active;logAudit('STAFF_TOGGLE',code);renderAll();}
+
+function uploadDoc(){const t=document.getElementById('uploadTitle').value,c=document.getElementById('uploadComment').value;if(!t)return alert('Title?');DB.uploads.push({title:t,comment:c,teacher:CURRENT_TEACHER});logAudit('UPLOAD',t);renderAll();}
+function addTask(){const t=document.getElementById('taskTitle').value,d=document.getElementById('taskDue').value,teacher=document.getElementById('taskTeacher').value;if(!t||!d||!teacher)return alert('Fill all');DB.tasks.push({id:'T'+Date.now(),title:t,teacher,due:d,status:'late'});logAudit('TASK_ADD',t);renderAll();}
+function markDone(id){DB.tasks.find(t=>t.id===id).status='done';logAudit('TASK_DONE',id);renderAll();}
+
+function addFee(){const a=prompt('Amount R');if(a){DB.fees.push({learnerId:'L001',amount:+a,paid:0});logAudit('FEE_ADD',a);saveDB();renderAll();}}
+function payFee(id){const p=prompt('Pay R');if(p){DB.fees.find(f=>f.learnerId===id).paid+=+p;logAudit('FEE_PAY',p);saveDB();renderAll();}}
+function whatsappParent(code,msg){const num=prompt('Parent WhatsApp Number 06/07...');if(num)window.open(`https://wa.me/27${num.replace(/^0/,'')}?text=${encodeURIComponent(msg)}`);}
+
+function addMark(){if(DB.nscLocked&&DB.marks.some(m=>m.learnerId==='L012'))return alert('NSC LOCKED');const s=prompt('Subject');const m=prompt('Mark %');if(s&&m){DB.marks.push({learnerId:'L001',subject:s,mark:+m,term:'T3'});logAudit('MARK_ADD',s);saveDB();renderAll();}}
+function deleteMark(lid,sub){DB.marks=DB.marks.filter(m=>!(m.learnerId===lid&&m.subject===sub));logAudit('MARK_DEL',sub);saveDB();renderAll();}
+function bulkMarks(e){const f=e.target.files[0];const r=new FileReader();r.onload=ev=>{const wb=XLSX.read(ev.target.result,{type:'binary'});XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).forEach(row=>DB.marks.push({learnerId:row.ID,subject:row.Subject,mark:+row.Mark,term:'T3'}));logAudit('BULK_MARKS',f.name);saveDB();renderAll();};r.readAsBinaryString(f);}
+
+function checkNSCLock(){if(new Date().getMonth()===10&&new Date().getDate()>=15){DB.nscLocked=true;document.getElementById('marksCard')?.classList.add('locked');document.getElementById('nscLockMsg')?.classList.remove('hidden');}}
+
+function printReport(){const id=document.getElementById('reportLearner').value;const l=[...DB.learners,...DB.learnersG12].find(x=>x.id===id);const m=DB.marks.filter(x=>x.learnerId===id);const {jsPDF}=window.jspdf;const doc=new jsPDF();doc.text(`SPARSHUB REPORT: ${l.name}`,10,10);doc.text(`Grade: ${l.grade}`,10,20);m.forEach((x,i)=>doc.text(`${x.subject}: ${x.mark}%`,10,30+i*10));doc.save(`${l.name}_Report.pdf`);logAudit('REPORT_PDF',l.name);}
+
+function exportDBE(){const all=[...DB.learners,...DB.learnersG12];let csv='EMIS,ID,Name,Grade\n';all.forEach(l=>csv+=`${DB.emis},${l.id},"${l.name}",${l.grade}\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='SA-SAMS.csv';a.click();logAudit('EXPORT','ALL');}
+
+let deferredPrompt;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').classList.remove('hidden');});
+function installPWA(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;}}
+
 toggleRoleFields();
+const p=new URLSearchParams(window.location.search).get('parent');if(p){document.getElementById('roleSelect').value='parent';document.getElementById('parentCode').value=p;login();}
 </script>
 </body>
 </html>
