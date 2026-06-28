@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sparshub EDU-ERP v1.2 GOD TIER</title>
+<title>Sparshub EDU-ERP v1.2.1 FIXED</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -26,7 +26,7 @@ body{font-family:'Inter',sans-serif;background:#0f172a;color:#e2e8f0}
   <!-- LOGIN -->
   <div id="loginScreen" class="flex items-center justify-center min-h-screen">
     <div class="card p-8 rounded-2xl w-full max-w-md">
-      <h1 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB EDU-ERP v1.2</h1>
+      <h1 class="text-3xl font-800 text-center text-[#16a34a] mb-2">SPARSHUB EDU-ERP v1.2.1</h1>
       <p class="text-center text-sm text-slate-400 mb-6">100% SA-SAMS + GOD TIER</p>
       
       <input id="emisCode" type="text" placeholder="EMIS Code e.g. 909101234" class="w-full bg-slate-800 p-3 rounded-lg mb-3 border-slate-600">
@@ -236,8 +236,18 @@ function renderParent(code){
   document.getElementById('parentMarks').innerHTML = marks.map(m=>`<p>${m.subject}: <b>${m.mark}%</b></p>`).join('');
 }
 
-function addFee(){ const amt = prompt('Fee Amount R'); if(amt){ DB.fees.push({learnerId:'L001', amount:parseInt(amt), paid:0}); logAudit('ADD_FEE', 'R'+amt); renderAll(); }
-function payFee(id){ const f = DB.fees.find(x=>x.learnerId===id); const pay = prompt('Amount R'); if(pay){ f.paid += parseInt(pay); logAudit('PAY_FEE', 'R'+pay); renderAll(); }
+// FIXED: Added closing } here
+function addFee(){ 
+  const amt = prompt('Fee Amount R'); 
+  if(amt){ DB.fees.push({learnerId:'L001', amount:parseInt(amt), paid:0}); logAudit('ADD_FEE', 'R'+amt); renderAll(); }
+} // <- THIS WAS MISSING
+
+// FIXED: Added closing } here 
+function payFee(id){ 
+  const f = DB.fees.find(x=>x.learnerId===id); 
+  const pay = prompt('Amount R'); 
+  if(pay){ f.paid += parseInt(pay); logAudit('PAY_FEE', 'R'+pay); renderAll(); }
+} // <- THIS WAS MISSING
 
 function addMark(){
   if(DB.nscLocked && confirmGrade12()) return alert('🔒 NSC LOCKED: Cannot edit Grade 12 marks.');
